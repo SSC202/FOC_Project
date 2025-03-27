@@ -40,7 +40,7 @@ static unsigned char SPI_ReadByte(void)
 {
     unsigned char receivedByte = 0;
     // 发送数据并接收响应
-    HAL_SPI_Receive(&hspi1, &receivedByte, 1, HAL_MAX_DELAY);
+    HAL_SPI_Receive(&hspi1, &receivedByte, 1, 0x10);
     // 返回接收到的数据
     return receivedByte;
 }
@@ -50,7 +50,7 @@ static unsigned char SPI_ReadByte(void)
  */
 static void SPI_WriteByte(unsigned char buf)
 {
-    HAL_SPI_Transmit(&hspi1, &buf, 1, HAL_MAX_DELAY); // 使用 HAL 库发送数据
+    HAL_SPI_Transmit(&hspi1, &buf, 1, 0x10); // 使用 HAL 库发送数据
 }
 
 /**
@@ -60,7 +60,7 @@ static void AD2S1210_UpdataRegister(void)
 {
     SMAPLE_H;
     SMAPLE_L;
-    AD2S1210_delay(10);
+    AD2S1210_delay(1);
     SMAPLE_H;
 }
 
@@ -119,7 +119,7 @@ void AD2S1210_para_Init(void)
 {
     Load_AD2S.Mechanical_Angle        = 0;
     Load_AD2S.Electrical_Angle        = 0;
-    Load_AD2S.Electrical_Angle_offset = -3.26f;
+    Load_AD2S.Electrical_Angle_offset = 2.96;
     Load_AD2S.Angle                   = 0;
     Load_AD2S.fluat_data              = 0;
     Load_AD2S.Register_data           = 0;
@@ -300,7 +300,7 @@ void AD2S1210_Angle_Get(void)
 }
 
 /**
- * @brief   AD2S1210 读取速度
+ * @brief   AD2S1210 读取电角速度
  */
 void AD2S1210_Speed_Get(float t_sample)
 {
