@@ -20,7 +20,7 @@ void abc_2_alphabeta(abc_t *abc, alpha_beta_t *alpha_beta)
 void abc_2_dq(abc_t *abc, dq_t *dq, float theta)
 {
     dq->d = (2.f / 3.f) * ((cosf(theta))*abc->a + (cosf(theta - 2.f * M_PI / 3.f)) * abc->b + (cosf(theta + 2.f * M_PI / 3.f)) * abc->c);
-    dq->q = -(2.f / 3.f) * ((sinf(theta))*abc->a + (sinf(theta - 2.f * M_PI / 3.f)) * abc->b - (sinf(theta + 2.f * M_PI / 3.f)) * abc->c);
+    dq->q = -(2.f / 3.f) * ((sinf(theta))*abc->a + (sinf(theta - 2.f * M_PI / 3.f)) * abc->b + (sinf(theta + 2.f * M_PI / 3.f)) * abc->c);
 }
 
 /**
