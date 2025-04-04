@@ -163,27 +163,17 @@
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Load_AD2S,0x0A</ItemText>
+          <ItemText>Drive_hfi,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>load_speed_ref</ItemText>
+          <ItemText>drive_speed_ref</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Load_hfi,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>5</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Load_AD2S.Electrical_Angle_offset</ItemText>
-        </Ww>
-        <Ww>
-          <count>6</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>\\HFI_Project\../Usercode/usermain.c\Load_hfi.electric_theta_inj</ItemText>
+          <ItemText>Drive_AD2S,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

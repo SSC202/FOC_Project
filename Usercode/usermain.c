@@ -9,51 +9,81 @@ int fputc(int ch, FILE *f)
     return ch;
 }
 
-uint8_t system_enable    = 0;       // 系统使能参数
-uint8_t system_print     = 0;       // 参数打印
-float system_sample_time = 0.0001f; // 系统采样时间
-
-/**
- *  负载电机相关定义
+/******************************************************
+ * @brief   运行相关的参数,结合 CubeMX 进行定义
  */
-curr_sample_t Load_curr; // 负载电机采样电流相关结构体
-PID_t Load_id_pi;        // 负载电机d轴电流PI控制器结构体
-PID_t Load_iq_pi;        // 负载电机q轴电流PI控制器结构体
-PID_t Load_speed_pi;     // 负载电机速度PI控制器结构体
+uint8_t system_enable    = 0;       // 系统使能参数,0为失能,1为使能
+uint8_t system_print     = 0;       // 参数打印,用户自行定义串口打印的变量
+float system_sample_time = 0.0001f; // 系统采样时间,根据 CubeMX 配置
+uint16_t u_dac_value;               // DAC 示波器打印变量,用户自行赋值
 
-duty_abc_t Load_duty_abc; // 负载电机 ABC 相占空比值
-dq_t Load_idq;            // 负载电机 dq 轴电流
-abc_t Load_iabc;          // 负载电机 ABC 相电流
-dq_t Load_udq;            // 负载电机 dq 轴电压
-abc_t Load_uabc;          // 负载电机 ABC 相电压
+/******************************************************
+ * @brief   临时变量
+ */
+// float error = 0;
+// u_dac_value = (uint16_t)((Drive_hfi.i_err * 20000 * 200 / 2048) + 2048);
+// HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, u_dac_value);
 
-extern ad2s1210_t Load_AD2S; // 负载电机的旋变解码板结构体
+/******************************************************
+ * @brief   对拖平台驱动电机端相关定义
+ * @note    驱动电机变量命名使用 Drive_xxx 格式, 结构体使用 Drive, 单变量使用 drive
+ */
+// 速度环 PID 相关定义
+PID_t Drive_speed_pi; // 驱动电机速度PI控制器结构体
 
-float load_speed_ref; // 速度指令值(斜坡)
+// 电流环 PID 相关定义
+PID_t Drive_id_pi; // 驱动电机d轴电流PI控制器结构体
+PID_t Drive_iq_pi; // 驱动电机q轴电流PI控制器结构体
 
-LPF_t Load_ide_filter; // 估计 d 轴电流低通滤波器
-LPF_t Load_iqe_filter; // 估计 q 轴电流低通滤波器
-LPF_t Load_idt_filter; // 实际 d 轴电流低通滤波器
-LPF_t Load_iqt_filter; // 实际 q 轴电流低通滤波器
+// FOC dq-ABC 相关定义
+dq_t Drive_udql;   // 驱动电机 dq 轴低频指令电压
+abc_t Drive_uabcl; // 驱动电机 ABC 相低频指令电压
 
-hfi_t Load_hfi;   // 负载电机高频注入结构体
-dq_t Load_udqh;   // 负载电机高频注入 dq 轴电压
-abc_t Load_uabch; // 负载电机高频注入 ABC 相电压
+// SVPWM 输出相关定义
+abc_t Drive_uabc;          // 驱动电机 ABC 相指令电压
+duty_abc_t Drive_duty_abc; // 驱动电机 ABC 相占空比值
 
-dq_t Load_idqe; // 估计dq电流
-dq_t Load_idqt; // 实际dq电流
+// 电流采样相关定义
+curr_sample_t Drive_curr; // 驱动电机采样电流相关结构体
 
-dq_t Load_idqh;   // 负载电机高频注入 dq 轴电流
-abc_t Load_iabch; // 负载电机高频注入 ABC 相电流
+abc_t Drive_iabc; // 驱动电机 ABC 相电流(原始值)
+dq_t Drive_idq;   // 驱动电机 dq 轴电流(原始值)
 
-abc_t Load_iabcl; // 负载电机 ABC 相基波电流
-dq_t Load_idql;   // 负载电机 dq 轴基波电流
+// 电流低通滤波器
+LPF_t Drive_id_filter; // d 轴电流低通滤波器
+LPF_t Drive_iq_filter; // q 轴电流低通滤波器
 
-float hfi_power;                // 高频注入输入功率
-float sum_hfi_power;            // 功率和
-float average_hfi_power;        // 功率均值
-// 以下为 Debug 临时变量
-uint16_t u_dac_value;
+dq_t Drive_idql; // 驱动电机 dq 轴基波电流
+
+// 速度/位置采样相关定义
+extern ad2s1210_t Drive_AD2S; // 驱动电机的旋变解码板结构体
+
+float drive_speed_ref; // 速度指令值(斜坡)
+
+/******************************************************
+ * @brief   对拖平台负载电机端相关定义
+ * @note    驱动电机变量命名使用 Load_xxx 格式, 结构体使用 Load, 单变量使用 load
+ */
+
+/****************************************
+ * @brief   以下为无感算法变量相关定义,用户自行定义相关全局变量
+ */
+
+// 电流采样相关定义
+dq_t Drive_idq_hat; // 驱动电机 dq 轴电流(估计值)
+
+// 电流低通滤波器
+LPF_t Drive_id_hat_filter; // 估计 d 轴电流低通滤波器
+LPF_t Drive_iq_hat_filter; // 估计 q 轴电流低通滤波器
+
+dq_t Drive_idqh; // 负载电机高频注入 dq 轴响应电流
+
+// 高频注入
+hfi_t Drive_hfi; // 负载电机高频注入结构体
+
+// 电压注入
+dq_t Drive_udqh;   // 负载电机高频注入 dq 轴电压
+abc_t Drive_uabch; // 负载电机高频注入 ABC 相电压
 
 /**
  * @brief   Init Program
@@ -67,25 +97,23 @@ static void init(void)
     // system init
     system_enable = 0;
     // Init FOC parameters
-    Load_udq.d                 = 0;
-    Load_udq.q                 = 0;
-    load_speed_ref             = 0;
-    Load_curr.adc_val_u_offset = 0;
-    Load_curr.adc_val_v_offset = 0;
-    Load_curr.sample_flag      = CURR_SAMPLE_GET_OFFSET; // Read ADC Offset
-    PID_init(&Load_id_pi, 0.005, 12.5, 0, 80);           // Current PI Init
-    PID_init(&Load_iq_pi, 0.005, 12.5, 0, 80);
-    PID_init(&Load_speed_pi, 0.1, 0.1, 0, 1); // Speed PI Init
-    LPF_Init(&Load_ide_filter, 200, system_sample_time);
-    LPF_Init(&Load_iqe_filter, 200, system_sample_time);
-    LPF_Init(&Load_idt_filter, 200, system_sample_time);
-    LPF_Init(&Load_iqt_filter, 200, system_sample_time); // Current LPF Init
-    // Init HFI parameters
-    // AD2S1210_Angle_Get();
-    // observer_Init(&Load_hfi, 50, 0, system_sample_time, 1, 1, 200, 1000);
-	observer_Init(&Load_hfi, 50, 1.57, system_sample_time, 1, 1, 200, 1000);
-    // Power caculate init
-    sum_hfi_power = 0;
+    Drive_udqh.d                = 0;
+    Drive_udqh.q                = 0;
+    drive_speed_ref             = 0;
+    Drive_curr.adc_val_u_offset = 0;
+    Drive_curr.adc_val_v_offset = 0;
+    Drive_curr.sample_flag      = CURR_SAMPLE_GET_OFFSET; // Read ADC Offset
+    PID_init(&Drive_id_pi, 0.005, 12.5, 0, 80);           // Current PI Init
+    PID_init(&Drive_iq_pi, 0.005, 12.5, 0, 80);
+    PID_init(&Drive_speed_pi, 0.1, 0.1, 0, 1); // Speed PI Init
+    LPF_Init(&Drive_id_filter, 200, system_sample_time);
+    LPF_Init(&Drive_iq_filter, 200, system_sample_time);
+    LPF_Init(&Drive_id_hat_filter, 200, system_sample_time);
+    LPF_Init(&Drive_iq_hat_filter, 200, system_sample_time); // Current LPF Init
+                                                             // Init HFI parameters
+                                                             // AD2S1210_Angle_Get();
+                                                             // observer_Init(&Drive_hfi, 50, 0, system_sample_time, 1, 1, 200, 1000);
+    observer_Init(&Drive_hfi, 50, 0, system_sample_time, 0.00225, 200, 1000);
     // Current Sample
     HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
     __HAL_ADC_CLEAR_FLAG(&hadc1, ADC_FLAG_JEOC);
@@ -93,7 +121,7 @@ static void init(void)
     HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_4);
     HAL_ADCEx_InjectedStart_IT(&hadc1);
     // Wait for Read ADC Offset
-    while (Load_curr.sample_flag == CURR_SAMPLE_GET_OFFSET) {
+    while (Drive_curr.sample_flag == CURR_SAMPLE_GET_OFFSET) {
         ;
     }
     // DAC Init
@@ -118,188 +146,203 @@ void usermain(void)
         // DAC Print
         // Usart Print
         if (system_print == 0)
-            printf("U:%f,%f\n", Load_AD2S.Electrical_Angle, Load_hfi.electric_theta_obs);
+            printf("U:%f,%f\n", Drive_AD2S.Electrical_Angle, Drive_hfi.electric_theta_obs);
         else if (system_print == 1)
-            printf("U:%f\n", average_hfi_power);
+            printf("U:%f,%f\n", Drive_AD2S.Speed, Drive_hfi.speed_obs);
     }
 }
 
 /**
- * @brief   FOC计算程序
+ * @brief   FOC Control caculate, use it in interrupt
  */
 static void foc_calc(void)
 {
-    // 角度和速度采样
-    AD2S1210_Angle_Get();
-    AD2S1210_Speed_Get(system_sample_time);
+    // Angle and Speed Sample
+    AD2S1210_Angle_Get();                   // Angle Sample
+    AD2S1210_Speed_Get(system_sample_time); // Speed Sample
 
-    /**
-     * HFI 计算
+    /************************************************************
+     * @brief   HFI Caculate
      */
-    abc_2_dq(&Load_iabc, &Load_idqe, Load_hfi.electric_theta_obs);
-    // dq 轴 LPF
-    Load_ide_filter.input = Load_idqe.d;
-    Load_iqe_filter.input = Load_idqe.q;
-    LPF_Calc(&Load_ide_filter);
-    LPF_Calc(&Load_iqe_filter);
-    Load_idqh.d = Load_idqe.d - Load_ide_filter.output;
-    Load_idqh.q = Load_idqe.q - Load_iqe_filter.output;
 
-    Load_hfi.idh_last = Load_hfi.idh;
-    Load_hfi.iqh_last = Load_hfi.iqh;
-    Load_hfi.idh      = Load_idqh.d;
-    Load_hfi.iqh      = Load_idqh.q;
-    Load_hfi.delta_id = Load_hfi.idh - Load_hfi.idh_last;
-    Load_hfi.delta_iq = Load_hfi.iqh - Load_hfi.iqh_last;
-    // 每一拍进行功率计算
-    hfi_power = fabs(Load_udqh.d * Load_idqh.d) + fabs(Load_udqh.q * Load_idqh.q);
-    sum_hfi_power = sum_hfi_power + hfi_power;
-    if (Load_hfi.clap == 4) {
-        average_hfi_power = sum_hfi_power / 4.f;
-        sum_hfi_power = 0;
-        u_dac_value = ((average_hfi_power)/(5)) * 2048 + 2048;
-        HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, u_dac_value);
+    // current ABC-to-estimate dq
+    abc_2_dq(&Drive_iabc, &Drive_idq_hat, Drive_hfi.electric_theta_obs);
+
+    // estimate current HPF
+    Drive_id_hat_filter.input = Drive_idq_hat.d;
+    Drive_iq_hat_filter.input = Drive_idq_hat.q;
+    LPF_Calc(&Drive_id_hat_filter);
+    LPF_Calc(&Drive_iq_hat_filter);
+    Drive_idqh.d = Drive_idq_hat.d - Drive_id_hat_filter.output;
+    Drive_idqh.q = Drive_idq_hat.q - Drive_iq_hat_filter.output;
+
+    // delta_id and delta_iq caculate
+    Drive_hfi.idh_last = Drive_hfi.idh;
+    Drive_hfi.iqh_last = Drive_hfi.iqh;
+    Drive_hfi.idh      = Drive_idqh.d;
+    Drive_hfi.iqh      = Drive_idqh.q;
+    Drive_hfi.delta_id = Drive_hfi.idh - Drive_hfi.idh_last;
+    Drive_hfi.delta_iq = Drive_hfi.iqh - Drive_hfi.iqh_last;
+
+    // caculate angle at clap 2 and clap 4
+    if (Drive_hfi.clap == 2 || Drive_hfi.clap == 4) {
+        observer_Calc(&Drive_hfi, system_enable);
     }
-    // 在第二拍和第四拍时进行角度计算
-    if (Load_hfi.clap == 2 || Load_hfi.clap == 4) {
-        observer_Calc(&Load_hfi, system_enable);
+    if (system_enable == 0) {
+        Drive_hfi.electric_theta_obs = Drive_AD2S.Electrical_Angle;
     }
-    if(system_enable == 0)
-    {
-        Load_hfi.electric_theta_obs = Load_AD2S.Electrical_Angle;
-    }
-    
 
-    /**
-     * FOC 计算
-     */
-    abc_2_dq(&Load_iabc, &Load_idqt, Load_AD2S.Electrical_Angle);
-    Load_idt_filter.input = Load_idqt.d;
-    Load_iqt_filter.input = Load_idqt.q;
-    LPF_Calc(&Load_idt_filter);
-    LPF_Calc(&Load_iqt_filter);
-    Load_idql.d = Load_idt_filter.output;
-    Load_idql.q = Load_iqt_filter.output;
-
-    // 速度 PI 控制器计算
-    Load_speed_pi.ref = load_speed_ref;
-    Load_speed_pi.fdb = Load_AD2S.Speed;
-    PID_Calc(&Load_speed_pi, system_enable, system_sample_time);
-
-    // 电流 PI 控制器计算(id = 0)
-    // d轴
-    Load_id_pi.ref = 0;
-    Load_id_pi.fdb = Load_idql.d;
-    PID_Calc(&Load_id_pi, system_enable, system_sample_time);
-    Load_udq.d = Load_id_pi.output;
-
-    // q轴
-    Load_iq_pi.ref = Load_speed_pi.output;
-    Load_iq_pi.fdb = Load_idql.q;
-    PID_Calc(&Load_iq_pi, system_enable, system_sample_time);
-    Load_udq.q = Load_iq_pi.output;
-
-    dq_2_abc(&Load_udq, &Load_uabc, Load_AD2S.Electrical_Angle);
-
-    /**
-     * HFI 注入
-     */
-    // HFI 状态
-    switch (Load_hfi.clap) {
-        // 第一拍
+    // HFI Status
+    switch (Drive_hfi.clap) {
+        // clap 1
         case 1:
-            Load_hfi.inject_counter = 1;
-            Load_hfi.clap           = 2;
+            Drive_hfi.inject_counter = 1;
+            Drive_hfi.clap           = 2;
             break;
-        // 第二拍
+        // clap 2
         case 2:
-            Load_hfi.inject_counter = -1;
-            Load_hfi.clap           = 3;
+            Drive_hfi.inject_counter = -1;
+            Drive_hfi.clap           = 3;
             break;
-        // 第三拍
+        // clap 3
         case 3:
-            Load_hfi.inject_counter = -1;
-            Load_hfi.clap           = 4;
+            Drive_hfi.inject_counter = -1;
+            Drive_hfi.clap           = 4;
             break;
-        // 第四拍
+        // clap 4
         case 4:
-            Load_hfi.inject_counter = 1;
-            Load_hfi.clap           = 1;
+            Drive_hfi.inject_counter = 1;
+            Drive_hfi.clap           = 1;
             break;
         default:
-            Load_hfi.inject_counter = 1;
-            Load_hfi.clap           = 1;
+            Drive_hfi.inject_counter = 1;
+            Drive_hfi.clap           = 1;
             break;
     }
-    Load_udqh.d = Load_hfi.u_h * cosf(Load_hfi.electric_theta_inj) * Load_hfi.inject_counter;
-    Load_udqh.q = Load_hfi.u_h * sinf(Load_hfi.electric_theta_inj) * Load_hfi.inject_counter;
-    dq_2_abc(&Load_udqh, &Load_uabch, Load_hfi.electric_theta_obs);
 
-    // SVPWM
-    Load_uabc.a = Load_uabc.a + Load_uabch.a;
-    Load_uabc.b = Load_uabc.b + Load_uabch.b;
-    Load_uabc.c = Load_uabc.c + Load_uabch.c;
-    e_svpwm(&Load_uabc, 201, &Load_duty_abc);
+    // voltage inject
+    Drive_udqh.d = Drive_hfi.u_h * cosf(Drive_hfi.electric_theta_inj) * Drive_hfi.inject_counter;
+    Drive_udqh.q = Drive_hfi.u_h * sinf(Drive_hfi.electric_theta_inj) * Drive_hfi.inject_counter;
+
+    // voltage dq-to-abc
+    dq_2_abc(&Drive_udqh, &Drive_uabch, Drive_hfi.electric_theta_obs);
+
+    /************************************************************
+     * @brief   FOC Caculate
+     */
+
+    // Speed loop
+    Drive_speed_pi.ref = drive_speed_ref;
+    // Drive_speed_pi.fdb = Drive_AD2S.Speed;
+    Drive_speed_pi.fdb = Drive_hfi.speed_obs;
+    PID_Calc(&Drive_speed_pi, system_enable, system_sample_time);
+
+    // Current loop
+    // current ABC-to-dq
+    // abc_2_dq(&Drive_iabc, &Drive_idq, Drive_AD2S.Electrical_Angle);
+    abc_2_dq(&Drive_iabc, &Drive_idq, Drive_hfi.electric_theta_obs);
+
+    // current LPF
+    Drive_id_filter.input = Drive_idq.d;
+    Drive_iq_filter.input = Drive_idq.q;
+    LPF_Calc(&Drive_id_filter);
+    LPF_Calc(&Drive_iq_filter);
+    Drive_idql.d = Drive_id_filter.output;
+    Drive_idql.q = Drive_iq_filter.output;
+
+    // (id=0 control)Current PI Controller
+    // d-axis
+    Drive_id_pi.ref = 0;
+    Drive_id_pi.fdb = Drive_idql.d;
+    PID_Calc(&Drive_id_pi, system_enable, system_sample_time);
+    Drive_udql.d = Drive_id_pi.output;
+
+    // q-axis
+    Drive_iq_pi.ref = Drive_speed_pi.output;
+    Drive_iq_pi.fdb = Drive_idql.q;
+    PID_Calc(&Drive_iq_pi, system_enable, system_sample_time);
+    Drive_udql.q = Drive_iq_pi.output;
+
+    // voltage dq-to-ABC
+    // dq_2_abc(&Drive_udql, &Drive_uabcl, Drive_AD2S.Electrical_Angle);
+    dq_2_abc(&Drive_udql, &Drive_uabcl, Drive_hfi.electric_theta_obs);
+
+    /************************************************************
+     * @brief   SVPWM
+     */
+    Drive_uabc.a = Drive_uabcl.a + Drive_uabch.a;
+    Drive_uabc.b = Drive_uabcl.b + Drive_uabch.b;
+    Drive_uabc.c = Drive_uabcl.c + Drive_uabch.c;
+    e_svpwm(&Drive_uabc, 201, &Drive_duty_abc);
 }
 
 /**
- * @brief   定时器中断
- */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-    if (htim->Instance == TIM8) {
-    }
-}
-
-/**
- * @brief   ADC 注入组转换中断函数
+ * @brief   ADC Injected Channel interrupt Callback function
  */
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
     static int adc_cnt               = 0;
     static uint32_t adc_u_offset_sum = 0;
     static uint32_t adc_v_offset_sum = 0;
-    HAL_GPIO_WritePin(GPIOF, GPIO_PIN_3, 0);
+    HAL_GPIO_WritePin(GPIOF, GPIO_PIN_3, 0); // Caculate running time
     UNUSED(hadc);
+    /**********************************
+     * @brief   Current sample
+     */
     if (hadc == &hadc1) {
         // Read Offset
-        if (Load_curr.sample_flag == CURR_SAMPLE_GET_OFFSET) {
+        if (Drive_curr.sample_flag == CURR_SAMPLE_GET_OFFSET) {
             adc_u_offset_sum += hadc1.Instance->JDR1;
             adc_v_offset_sum += hadc1.Instance->JDR2;
             adc_cnt++;
             if (adc_cnt == 20) {
-                adc_cnt                    = 0;
-                Load_curr.adc_val_u_offset = adc_u_offset_sum / 20.0f;
-                Load_curr.adc_val_v_offset = adc_v_offset_sum / 20.0f;
-                Load_curr.sample_flag      = CURR_SAMPLE_RUNNING;
-                adc_u_offset_sum           = 0;
-                adc_v_offset_sum           = 0;
+                adc_cnt                     = 0;
+                Drive_curr.adc_val_u_offset = adc_u_offset_sum / 20.0f;
+                Drive_curr.adc_val_v_offset = adc_v_offset_sum / 20.0f;
+                Drive_curr.sample_flag      = CURR_SAMPLE_RUNNING;
+                adc_u_offset_sum            = 0;
+                adc_v_offset_sum            = 0;
             }
         }
         // Read Current
         else {
-            Load_curr.adc_val_u = hadc1.Instance->JDR1;
-            Load_curr.adc_val_v = hadc1.Instance->JDR2;
-            adc_2_curr(&Load_curr);
-            Load_iabc.a = Load_curr.curr_u;
-            Load_iabc.b = Load_curr.curr_v;
-            Load_iabc.c = Load_curr.curr_w;
+            Drive_curr.adc_val_u = hadc1.Instance->JDR1;
+            Drive_curr.adc_val_v = hadc1.Instance->JDR2;
+            adc_2_curr(&Drive_curr);
+            Drive_iabc.a = Drive_curr.curr_u;
+            Drive_iabc.b = Drive_curr.curr_v;
+            Drive_iabc.c = Drive_curr.curr_w;
             // software protection
-            if ((Load_iabc.a * Load_iabc.a > 1.3 * 1.3) || (Load_iabc.b * Load_iabc.b > 1.3 * 1.3) || (Load_iabc.c * Load_iabc.c > 1.3 * 1.3)) {
+            if ((Drive_iabc.a * Drive_iabc.a > 1.3 * 1.3) || (Drive_iabc.b * Drive_iabc.b > 1.3 * 1.3) || (Drive_iabc.c * Drive_iabc.c > 1.3 * 1.3)) {
                 system_enable = 0;
             }
         }
     }
+    /**********************************
+     * @brief   FOC Calculate
+     */
     foc_calc();
-    // Inverter
+    /**********************************
+     * @brief   Voltage-Source Inverter Control
+     */
     if (system_enable == 0) {
         TIM8->CCR1 = 0;
         TIM8->CCR2 = 0;
         TIM8->CCR3 = 0;
     } else {
-        TIM8->CCR1 = Load_duty_abc.dutya * TIM8->ARR;
-        TIM8->CCR2 = Load_duty_abc.dutyb * TIM8->ARR;
-        TIM8->CCR3 = Load_duty_abc.dutyc * TIM8->ARR;
+        TIM8->CCR1 = Drive_duty_abc.dutya * TIM8->ARR;
+        TIM8->CCR2 = Drive_duty_abc.dutyb * TIM8->ARR;
+        TIM8->CCR3 = Drive_duty_abc.dutyc * TIM8->ARR;
     }
-    HAL_GPIO_WritePin(GPIOF, GPIO_PIN_3, 1);
+
+    HAL_GPIO_WritePin(GPIOF, GPIO_PIN_3, 1); // Caculate running time
+}
+
+/**
+ * @brief   Timer interrupt
+ */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM8) {
+    }
 }

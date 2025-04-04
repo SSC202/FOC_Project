@@ -3,8 +3,8 @@
 /**
  * @brief       SVPWM 占空比生成函数
  * @attention   使用三次谐波注入法
- * @param       u_ref       参考电压
- * @param       u_dc         母线电压
+ * @param       u_ref      参考电压
+ * @param       u_dc       母线电压
  * @param       duty_abc   输出占空比
  */
 void e_svpwm(abc_t *u_ref, float u_dc, duty_abc_t *duty_abc)

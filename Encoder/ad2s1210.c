@@ -6,7 +6,7 @@
  */
 #include "ad2s1210.h"
 
-ad2s1210_t Load_AD2S;
+ad2s1210_t Drive_AD2S;
 
 /**
  * @brief   AD2S1210 延时
@@ -117,17 +117,17 @@ void AD2S1210_ModeSelect(AD2S1210_CONTROL_MOD_ENUM mode)
  */
 void AD2S1210_para_Init(void)
 {
-    Load_AD2S.Mechanical_Angle        = 0;
-    Load_AD2S.Electrical_Angle        = 0;
-    Load_AD2S.Electrical_Angle_offset = 2.96;
-    Load_AD2S.Angle                   = 0;
-    Load_AD2S.fluat_data              = 0;
-    Load_AD2S.Register_data           = 0;
-    Load_AD2S.Speed                   = 0;
-    Load_AD2S.Current_Angle           = 0;
-    Load_AD2S.Last_Angle              = 0;
-    Load_AD2S.angle_diff              = 0;
-    Load_AD2S.Current_Speed           = 0;
+    Drive_AD2S.Mechanical_Angle        = 0;
+    Drive_AD2S.Electrical_Angle        = 0;
+    Drive_AD2S.Electrical_Angle_offset = 2.96;
+    Drive_AD2S.Angle                   = 0;
+    Drive_AD2S.fluat_data              = 0;
+    Drive_AD2S.Register_data           = 0;
+    Drive_AD2S.Speed                   = 0;
+    Drive_AD2S.Current_Angle           = 0;
+    Drive_AD2S.Last_Angle              = 0;
+    Drive_AD2S.angle_diff              = 0;
+    Drive_AD2S.Current_Speed           = 0;
 }
 
 /**
@@ -179,7 +179,7 @@ int AD2S1210_ReadPosition(AD2S1210_CHIP_ENUM index)
     AD2S1210_DataRelease();
     position_data = SPI_ReadByte() << 8; // 高八位
     position_data += SPI_ReadByte();     // 低八位
-    //	Load_AD2S.fluat_data = SPI_ReadByte();
+    //	Drive_AD2S.fluat_data = SPI_ReadByte();
     AD2S1210_DataLock();
     return position_data;
 }
@@ -286,7 +286,7 @@ void AD2S1210_Init(void)
     AD2S1210_WriteRegister(AD2S1210_EXC_FRE, 32); // 设置激励信号为10kHZ（40），20=5k，80=20k
     AD2S1210_WriteRegister(AD2S1210_LOS_THRESHOLD, 0x01);
     AD2S1210_WriteRegister(AD2S1210_DOS_MISS_THRESHOLD, 0X7F);
-    //	Load_AD2S.Register_data = AD2S1210_ReadRegister(ONE,AD2S1210_LOS_THRESHOLD);
+    //	Drive_AD2S.Register_data = AD2S1210_ReadRegister(ONE,AD2S1210_LOS_THRESHOLD);
     AD2S1210_ModeSelect(POSITION);
 }
 
@@ -295,8 +295,8 @@ void AD2S1210_Init(void)
  */
 void AD2S1210_Angle_Get(void)
 {
-    Load_AD2S.Mechanical_Angle = (AD2S1210_ReadPosition(ONE) - 32767) * M_PI / 32767.f;
-    Load_AD2S.Electrical_Angle = normalize(4, Load_AD2S.Mechanical_Angle, Load_AD2S.Electrical_Angle_offset);
+    Drive_AD2S.Mechanical_Angle = (AD2S1210_ReadPosition(ONE) - 32767) * M_PI / 32767.f;
+    Drive_AD2S.Electrical_Angle = normalize(4, Drive_AD2S.Mechanical_Angle, Drive_AD2S.Electrical_Angle_offset);
 }
 
 /**
@@ -304,16 +304,16 @@ void AD2S1210_Angle_Get(void)
  */
 void AD2S1210_Speed_Get(float t_sample)
 {
-    Load_AD2S.Current_Angle = Load_AD2S.Electrical_Angle;
-    Load_AD2S.angle_diff    = (Load_AD2S.Current_Angle - Load_AD2S.Last_Angle);
-    if (Load_AD2S.angle_diff > M_PI) {
-        Load_AD2S.angle_diff = Load_AD2S.angle_diff - 2 * M_PI;
-    } else if (Load_AD2S.angle_diff < -M_PI) {
-        Load_AD2S.angle_diff = Load_AD2S.angle_diff + 2 * M_PI;
+    Drive_AD2S.Current_Angle = Drive_AD2S.Electrical_Angle;
+    Drive_AD2S.angle_diff    = (Drive_AD2S.Current_Angle - Drive_AD2S.Last_Angle);
+    if (Drive_AD2S.angle_diff > M_PI) {
+        Drive_AD2S.angle_diff = Drive_AD2S.angle_diff - 2 * M_PI;
+    } else if (Drive_AD2S.angle_diff < -M_PI) {
+        Drive_AD2S.angle_diff = Drive_AD2S.angle_diff + 2 * M_PI;
     } else {
-        Load_AD2S.angle_diff = Load_AD2S.angle_diff;
+        Drive_AD2S.angle_diff = Drive_AD2S.angle_diff;
     }
 
-    Load_AD2S.Speed      = Load_AD2S.angle_diff / t_sample;
-    Load_AD2S.Last_Angle = Load_AD2S.Current_Angle;
+    Drive_AD2S.Speed      = Drive_AD2S.angle_diff / t_sample;
+    Drive_AD2S.Last_Angle = Drive_AD2S.Current_Angle;
 }

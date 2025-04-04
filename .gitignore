@@ -2,7 +2,7 @@
 /.vscode/launch.json
 /.settings
 /.eide/log
-/.eide.usr.ctx.json
+
 
 # project out
 /build
@@ -16,7 +16,6 @@
 
 # config and debug
 /.vscode
-/.eide
 *.json
 *.d
 *.o
@@ -30,4 +29,4 @@
 *.sct
 *.uvguix.*
 *.crf
-
+*.ini

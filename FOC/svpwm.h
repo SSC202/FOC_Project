@@ -1,10 +1,8 @@
 /**
  * @file    SVPWM 相关代码
  * @note    本文件包含 SVPWM 的相关定义
- *          1. 接口
- *              duty_abc_t  ABC 三相占空比
- *          2. 函数定义
- *              e_svpwm()   简单 SVPWM (三次谐波注入法)
+ *          接口类型    duty_abc_t  ABC 三相占空比结构体,使用时在主程序内定义全局变量
+ *          接口函数    e_svpwm()   简单 SVPWM (三次谐波注入法)
  */
 #ifndef __SVPWM_H
 #define __SVPWM_H

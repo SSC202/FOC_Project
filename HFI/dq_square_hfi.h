@@ -26,8 +26,6 @@ typedef struct
     uint8_t clap;             // 注入节拍(4拍,1,2,3,4)
     int inject_counter;       // 注入电压符号
     float hfi_inject_t;       // 注入方波高电平时间
-    float Ld;                 // d 轴电感
-    float Lq;                 // q 轴电感
 
     // HFI 观测器
     float electric_theta_obs; // 观测电角度
@@ -47,13 +45,15 @@ typedef struct
     float i_comp;
     float i_err;
 
-    float offset;
+    float offset; // 变轴系注入偏置量增益
 
     PLL_t pll; // 锁相环(增量式PID)
+
+    LPF_t speed_lpf; // 速度低通滤波器
 
 } hfi_t;
 
 void observer_Calc(hfi_t *hfi, uint8_t enable);
-void observer_Init(hfi_t *hfi, float uh, float theta_inj, float t_sample, float Ld, float Lq, double pll_kp, double pll_ki);
+void observer_Init(hfi_t *hfi, float uh, float theta_inj, float t_sample, float offset, double pll_kp, double pll_ki);
 
 #endif

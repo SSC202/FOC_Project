@@ -1,3 +1,9 @@
+/**
+ * @brief   变轴系高频注入相关代码
+ * @author  SSC
+ * @note    代码包含观测器初始化和观测器计算两部分,初始时使用观测器初始化初始化各项参数,在中断中使用正确的时序进行观测器计算
+ */
+
 #include "dq_square_hfi.h"
 
 /**
@@ -26,15 +32,14 @@ static void PLL_Calc(PLL_t *pll, uint8_t enable, float t_sample)
  * @param   pll_ki          锁相环 Ki
  * @param   theta_obs_init  电角度初值
  */
-void observer_Init(hfi_t *hfi, float uh, float theta_inj, float t_sample, float Ld, float Lq, double pll_kp, double pll_ki)
+void observer_Init(hfi_t *hfi, float uh, float theta_inj, float t_sample, float offset, double pll_kp, double pll_ki)
 {
     hfi->u_h                = uh;
     hfi->electric_theta_inj = theta_inj;
     hfi->clap               = 1; // 初始化为第一拍
     hfi->inject_counter     = 1; // 第一拍为正
     hfi->hfi_inject_t       = 2 * t_sample;
-    hfi->Ld                 = Ld;
-    hfi->Lq                 = Lq;
+    hfi->offset             = offset; // 变轴系信号偏置
 
     hfi->pll.cur_error = 0;
     hfi->pll.error[0]  = 0;
@@ -54,6 +59,8 @@ void observer_Init(hfi_t *hfi, float uh, float theta_inj, float t_sample, float 
     hfi->i_sig  = 0;
     hfi->i_comp = 0;
     hfi->i_err  = 0;
+
+    LPF_Init(&(hfi->speed_lpf), 50, hfi->hfi_inject_t);
 }
 
 /**
@@ -66,13 +73,19 @@ void observer_Calc(hfi_t *hfi, uint8_t enable)
     hfi->iq_sig = hfi->delta_iq * (float)hfi->inject_counter;
 
     hfi->i_sig  = hfi->id_sig * sinf(hfi->electric_theta_inj) + hfi->iq_sig * cosf(hfi->electric_theta_inj);
-    hfi->i_comp = (hfi->u_h * hfi->hfi_inject_t * (hfi->Ld + hfi->Lq) * sinf(2 * hfi->electric_theta_inj)) / (hfi->Ld * hfi->Lq);
+    hfi->i_comp = hfi->u_h * hfi->offset * sinf(2 * hfi->electric_theta_inj);
     hfi->i_err  = hfi->i_sig - hfi->i_comp;
 
     // 锁相环计算
     hfi->pll.cur_error = hfi->i_err;
     PLL_Calc(&(hfi->pll), enable, hfi->hfi_inject_t);
-    hfi->speed_obs = hfi->pll.output;
+
+    // Speed LPF
+    hfi->speed_lpf.input = hfi->pll.output;
+    LPF_Calc(&hfi->speed_lpf);
+    hfi->speed_obs = hfi->speed_lpf.output;
+
+    // Angle output
     hfi->electric_theta_obs += hfi->pll.output * hfi->hfi_inject_t;
 
     while (hfi->electric_theta_obs < -M_PI) {
