@@ -17,6 +17,7 @@
 # config and debug
 /.vscode
 *.json
+!eide.json
 *.d
 *.o
 *.dep
