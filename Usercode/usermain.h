@@ -6,6 +6,7 @@
 #include "tim.h"
 #include "spi.h"
 #include "adc.h"
+#include "dac.h"
 #include "usart.h"
 
 #include "stdio.h"
@@ -15,10 +16,8 @@
 #include "svpwm.h"
 #include "curr_sample.h"
 
-// 硬件配置相关文件
+// 编码器相关文件
 #include "ad2s1210.h"
-
-extern uint8_t system_enable;
 
 void usermain(void);
 

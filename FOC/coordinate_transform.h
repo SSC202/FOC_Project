@@ -1,18 +1,18 @@
 /**
  * @file    坐标变换相关函数
  * @note    本文件包含了电机坐标变换的相关函数和接口
- *          1. 变量类型接口
+ *          接口类型
  *              abc_t               三相静止坐标系下的物理量类型结构体(电压/电流...)
  *              dq_t                两相旋转坐标系下的物理量类型结构体(电压/电流...)
  *              alpha_beta_t        两相静止坐标系下的物理量类型结构体(电压/电流...)
- *          2. 接口函数
+ *          接口函数
  *              函数规范: 第一个参数为变换前的结构体指针,第二个参数为变换后的结构体指针,第三个参数为变换时的电角度
- *              abc_2_alphabeta     
- *              abc_2_dq
- *              alphabeta_2_abc    
- *              alphabeta_2_dq
- *              dq_2_abc 
- *              dq_2_alphabeta
+ *              abc_2_alphabeta     ABC 轴系物理量变换到 alpha-beta 轴系
+ *              abc_2_dq            ABC 轴系物理量变换到 dq 轴系
+ *              alphabeta_2_abc     alpha-beta 轴系物理量变换到 ABC 轴系
+ *              alphabeta_2_dq      alpha-beta 轴系物理量变换到 dq 轴系
+ *              dq_2_abc            dq 轴系物理量变换到 ABC 轴系
+ *              dq_2_alphabeta      dq 轴系物理量变换到 alpha-beta 轴系
  */
 #ifndef __COORDINATE_TRANSFORM_H
 #define __COORDINATE_TRANSFORM_H
