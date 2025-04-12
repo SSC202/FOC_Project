@@ -89,6 +89,8 @@ static void init(void)
     PID_init(&Drive_id_pi, 0.005, 12.5, 0, 80);           // Current PI Init
     PID_init(&Drive_iq_pi, 0.005, 12.5, 0, 80);
     PID_init(&Drive_speed_pi, 0.1, 0.1, 0, 1); // Speed PI Init
+		LPF_Init(&Drive_id_filter, 200, system_sample_time); // Idq LPF init
+    LPF_Init(&Drive_iq_filter, 200, system_sample_time);
     // Current Sample
     HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
     __HAL_ADC_CLEAR_FLAG(&hadc1, ADC_FLAG_JEOC);
@@ -131,7 +133,10 @@ static void foc_calc(void)
     // Angle and Speed Sample
     AD2S1210_Angle_Get();                   // Angle Sample
     AD2S1210_Speed_Get(system_sample_time); // Speed Sample
-
+    /************************************************************
+     * @brief   HFI Caculate
+     */
+    
     /************************************************************
      * @brief   FOC Caculate
      */
@@ -144,8 +149,7 @@ static void foc_calc(void)
 
     // Current loop
     // current ABC-to-dq
-    // abc_2_dq(&Drive_iabc, &Drive_idq, Drive_AD2S.Electrical_Angle);
-    // abc_2_dq(&Drive_iabc, &Drive_idq, Drive_hfi.electric_theta_obs);
+    abc_2_dq(&Drive_iabc, &Drive_idq, Drive_AD2S.Electrical_Angle);
 
     // current LPF
     Drive_id_filter.input = Drive_idq.d;
@@ -158,13 +162,13 @@ static void foc_calc(void)
     // (id=0 control)Current PI Controller
     // d-axis
     Drive_id_pi.ref = 0;
-    Drive_id_pi.fdb = Drive_idql.d;
+    Drive_id_pi.fdb = Drive_idq.d;
     PID_Calc(&Drive_id_pi, system_enable, system_sample_time);
     Drive_udql.d = Drive_id_pi.output;
 
     // q-axis
     Drive_iq_pi.ref = Drive_speed_pi.output;
-    Drive_iq_pi.fdb = Drive_idql.q;
+    Drive_iq_pi.fdb = Drive_idq.q;
     PID_Calc(&Drive_iq_pi, system_enable, system_sample_time);
     Drive_udql.q = Drive_iq_pi.output;
 
@@ -248,8 +252,5 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM8) {
-    }
-    // 100 Hz Caculate input power
-    if (htim->Instance == TIM2) {
     }
 }
