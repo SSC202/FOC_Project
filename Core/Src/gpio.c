@@ -45,54 +45,86 @@ void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOE_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_3, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, AD2S2_A1_Pin|AD2S2_DIR_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, AD2S1_SAM_Pin|AD2S1_A0_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, AD2S2_RD_Pin|AD2S2_RESET_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, AD2S1_RESET_Pin|AD2S1_PCS_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOF, AD2S1_SAM_Pin|GPIO_PIN_4, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, AD2S1_RD_Pin|SPI1_CS_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(AD2S1_RESET_GPIO_Port, AD2S1_RESET_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(AD2S2_SAM_GPIO_Port, AD2S2_SAM_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, AD2S1_RD_Pin|AD2S2_PCS_Pin|SPI1_CS_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, AD2S2_A0_Pin|AD2S1_DIR_Pin|AD2S1_A1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOG, GPIO_PIN_7, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, AD2S1_DIR_Pin|AD2S1_A1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(AD2S1_PCS_GPIO_Port, AD2S1_PCS_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pin : PF3 */
-  GPIO_InitStruct.Pin = GPIO_PIN_3;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(AD2S1_A0_GPIO_Port, AD2S1_A0_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pins : AD2S2_A1_Pin AD2S2_DIR_Pin SPI2_CS_Pin */
+  GPIO_InitStruct.Pin = AD2S2_A1_Pin|AD2S2_DIR_Pin|SPI2_CS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : AD2S2_RD_Pin AD2S2_SAM_Pin AD2S2_RESET_Pin */
+  GPIO_InitStruct.Pin = AD2S2_RD_Pin|AD2S2_SAM_Pin|AD2S2_RESET_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : AD2S1_SAM_Pin */
+  GPIO_InitStruct.Pin = AD2S1_SAM_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(AD2S1_SAM_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : AD2S1_RESET_Pin */
+  GPIO_InitStruct.Pin = AD2S1_RESET_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(AD2S1_RESET_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PF4 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : AD2S1_SAM_Pin AD2S1_PCS_Pin */
-  GPIO_InitStruct.Pin = AD2S1_SAM_Pin|AD2S1_PCS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : AD2S1_RESET_Pin AD2S1_A0_Pin */
-  GPIO_InitStruct.Pin = AD2S1_RESET_Pin|AD2S1_A0_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : AD2S1_RD_Pin AD2S1_DIR_Pin AD2S1_A1_Pin */
-  GPIO_InitStruct.Pin = AD2S1_RD_Pin|AD2S1_DIR_Pin|AD2S1_A1_Pin;
+  /*Configure GPIO pins : AD2S1_RD_Pin AD2S2_PCS_Pin AD2S2_A0_Pin AD2S1_DIR_Pin
+                           AD2S1_A1_Pin */
+  GPIO_InitStruct.Pin = AD2S1_RD_Pin|AD2S2_PCS_Pin|AD2S2_A0_Pin|AD2S1_DIR_Pin
+                          |AD2S1_A1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -104,6 +136,20 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : AD2S1_PCS_Pin */
+  GPIO_InitStruct.Pin = AD2S1_PCS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(AD2S1_PCS_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : AD2S1_A0_Pin */
+  GPIO_InitStruct.Pin = AD2S1_A0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(AD2S1_A0_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SPI1_CS_Pin */
   GPIO_InitStruct.Pin = SPI1_CS_Pin;

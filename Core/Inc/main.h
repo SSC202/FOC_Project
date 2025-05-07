@@ -57,16 +57,28 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define AD2S2_A1_Pin GPIO_PIN_4
+#define AD2S2_A1_GPIO_Port GPIOE
+#define AD2S2_RD_Pin GPIO_PIN_13
+#define AD2S2_RD_GPIO_Port GPIOC
 #define AD2S1_SAM_Pin GPIO_PIN_0
-#define AD2S1_SAM_GPIO_Port GPIOA
-#define AD2S1_RESET_Pin GPIO_PIN_3
-#define AD2S1_RESET_GPIO_Port GPIOA
+#define AD2S1_SAM_GPIO_Port GPIOF
+#define AD2S1_RESET_Pin GPIO_PIN_1
+#define AD2S1_RESET_GPIO_Port GPIOF
+#define AD2S2_SAM_Pin GPIO_PIN_2
+#define AD2S2_SAM_GPIO_Port GPIOC
+#define AD2S2_RESET_Pin GPIO_PIN_3
+#define AD2S2_RESET_GPIO_Port GPIOC
 #define M1_V_Pin GPIO_PIN_4
 #define M1_V_GPIO_Port GPIOC
 #define M1_U_Pin GPIO_PIN_5
 #define M1_U_GPIO_Port GPIOC
 #define AD2S1_RD_Pin GPIO_PIN_2
 #define AD2S1_RD_GPIO_Port GPIOB
+#define AD2S2_PCS_Pin GPIO_PIN_10
+#define AD2S2_PCS_GPIO_Port GPIOB
+#define AD2S2_A0_Pin GPIO_PIN_12
+#define AD2S2_A0_GPIO_Port GPIOB
 #define AD2S1_PCS_Pin GPIO_PIN_11
 #define AD2S1_PCS_GPIO_Port GPIOA
 #define AD2S1_A0_Pin GPIO_PIN_15
@@ -77,6 +89,10 @@ void Error_Handler(void);
 #define SPI1_CS_GPIO_Port GPIOB
 #define AD2S1_A1_Pin GPIO_PIN_9
 #define AD2S1_A1_GPIO_Port GPIOB
+#define AD2S2_DIR_Pin GPIO_PIN_0
+#define AD2S2_DIR_GPIO_Port GPIOE
+#define SPI2_CS_Pin GPIO_PIN_1
+#define SPI2_CS_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
 

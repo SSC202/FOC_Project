@@ -12,6 +12,7 @@ int fputc(int ch, FILE *f)
 /******************************************************
  * @brief   运行相关的参数,结合 CubeMX 进行定义
  */
+#define MAX_CURRENT 1.8f            // 电流限制
 uint8_t system_enable    = 0;       // 系统使能参数,0为失能,1为使能
 uint8_t system_print     = 0;       // 参数打印,用户自行定义串口打印的变量
 float system_sample_time = 0.0001f; // 系统采样时间,根据 CubeMX 配置
@@ -35,9 +36,6 @@ PID_t Drive_speed_pi; // 驱动电机速度PI控制器结构体
 PID_t Drive_id_pi; // 驱动电机d轴电流PI控制器结构体
 PID_t Drive_iq_pi; // 驱动电机q轴电流PI控制器结构体
 
-// FOC dq-ABC 相关定义
-dq_t Drive_udql; // 驱动电机 dq 轴低频指令电压
-
 // SVPWM 输出相关定义
 dq_t Drive_udq;            // 驱动电机 dq 轴指令电压
 abc_t Drive_uabc;          // 驱动电机 ABC 相指令电压
@@ -49,12 +47,6 @@ curr_sample_t Drive_curr; // 驱动电机采样电流相关结构体
 abc_t Drive_iabc; // 驱动电机 ABC 相电流(原始值)
 dq_t Drive_idq;   // 驱动电机 dq 轴电流(原始值)
 
-// 电流低通滤波器
-LPF_t Drive_id_filter; // d 轴电流低通滤波器
-LPF_t Drive_iq_filter; // q 轴电流低通滤波器
-
-dq_t Drive_idql; // 驱动电机 dq 轴基波电流
-
 // 速度/位置采样相关定义
 extern ad2s1210_t Drive_AD2S; // 驱动电机的旋变解码板结构体
 
@@ -62,13 +54,32 @@ float drive_speed_ref; // 速度指令值
 
 /******************************************************
  * @brief   对拖平台负载电机端相关定义
- * @note    驱动电机变量命名使用 Load_xxx 格式, 结构体使用 Load, 单变量使用 load
+ * @note    负载电机变量命名使用 Load_xxx 格式, 结构体使用 Load, 单变量使用 load
  */
+
+// 电流环 PID 相关定义
+PID_t Load_id_pi; // 负载电机d轴电流PI控制器结构体
+PID_t Load_iq_pi; // 负载电机q轴电流PI控制器结构体
+
+// SVPWM 输出相关定义
+dq_t Load_udq;            // 负载电机 dq 轴指令电压
+abc_t Load_uabc;          // 负载电机 ABC 相指令电压
+duty_abc_t Load_duty_abc; // 负载电机 ABC 相占空比值
+
+// 电流采样相关定义
+curr_sample_t Load_curr; // 负载电机采样电流相关结构体
+
+abc_t Load_iabc; // 负载电机 ABC 相电流(原始值)
+dq_t Load_idq;   // 负载电机 dq 轴电流(原始值)
+
+// 位置采样相关定义
+extern ad2s1210_t Load_AD2S; // 负载电机的旋变解码板结构体
+
+float load_iq_ref; // 电流指令值
 
 /****************************************
  * @brief   以下为无感算法变量相关定义,用户自行定义相关全局变量
  */
-
 
 /**
  * @brief   Init Program
@@ -82,6 +93,7 @@ static void init(void)
     // system init
     system_enable = 0;
     // Init FOC parameters
+    // Drive Motor
     drive_speed_ref             = 0;
     Drive_curr.adc_val_u_offset = 0;
     Drive_curr.adc_val_v_offset = 0;
@@ -89,8 +101,13 @@ static void init(void)
     PID_init(&Drive_id_pi, 0.005, 12.5, 0, 80);           // Current PI Init
     PID_init(&Drive_iq_pi, 0.005, 12.5, 0, 80);
     PID_init(&Drive_speed_pi, 0.1, 0.1, 0, 1); // Speed PI Init
-		LPF_Init(&Drive_id_filter, 200, system_sample_time); // Idq LPF init
-    LPF_Init(&Drive_iq_filter, 200, system_sample_time);
+    // Load Motor
+    load_iq_ref                = 0;
+    Load_curr.sample_flag      = CURR_SAMPLE_GET_OFFSET; // Read ADC Offset
+    Load_curr.adc_val_u_offset = 0;
+    Load_curr.adc_val_v_offset = 0;
+    PID_init(&Load_id_pi, 0.005, 12.5, 0, 80); // Current PI Init
+    PID_init(&Load_iq_pi, 0.005, 12.5, 0, 80);
     // Current Sample
     HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
     __HAL_ADC_CLEAR_FLAG(&hadc1, ADC_FLAG_JEOC);
@@ -98,7 +115,7 @@ static void init(void)
     HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_4);
     HAL_ADCEx_InjectedStart_IT(&hadc1);
     // Wait for Read ADC Offset
-    while (Drive_curr.sample_flag == CURR_SAMPLE_GET_OFFSET) {
+    while (Drive_curr.sample_flag == CURR_SAMPLE_GET_OFFSET || Load_curr.sample_flag == CURR_SAMPLE_GET_OFFSET) {
         ;
     }
     // DAC Init
@@ -111,6 +128,12 @@ static void init(void)
     HAL_TIMEx_PWMN_Start(&htim8, TIM_CHANNEL_1);
     HAL_TIMEx_PWMN_Start(&htim8, TIM_CHANNEL_2);
     HAL_TIMEx_PWMN_Start(&htim8, TIM_CHANNEL_3);
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+    HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+    HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+    HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
 }
 
 /**
@@ -122,21 +145,20 @@ void usermain(void)
     while (1) {
         // DAC Print
         // Usart Print
+        if (system_print == 0) {
+            printf("U:%f\r\n", Drive_AD2S.Electrical_Angle);
+        }
+        if (system_print == 1) {
+            printf("U:%f\r\n", Drive_AD2S.Speed);
+        }
     }
 }
 
 /**
- * @brief   FOC Control caculate, use it in interrupt
+ * @brief   Drive Motor FOC Control caculate, use it in interrupt
  */
-static void foc_calc(void)
+static void drive_foc_calc(void)
 {
-    // Angle and Speed Sample
-    AD2S1210_Angle_Get();                   // Angle Sample
-    AD2S1210_Speed_Get(system_sample_time); // Speed Sample
-    /************************************************************
-     * @brief   HFI Caculate
-     */
-    
     /************************************************************
      * @brief   FOC Caculate
      */
@@ -151,37 +173,54 @@ static void foc_calc(void)
     // current ABC-to-dq
     abc_2_dq(&Drive_iabc, &Drive_idq, Drive_AD2S.Electrical_Angle);
 
-    // current LPF
-    Drive_id_filter.input = Drive_idq.d;
-    Drive_iq_filter.input = Drive_idq.q;
-    LPF_Calc(&Drive_id_filter);
-    LPF_Calc(&Drive_iq_filter);
-    Drive_idql.d = Drive_id_filter.output;
-    Drive_idql.q = Drive_iq_filter.output;
-
     // (id=0 control)Current PI Controller
     // d-axis
     Drive_id_pi.ref = 0;
     Drive_id_pi.fdb = Drive_idq.d;
     PID_Calc(&Drive_id_pi, system_enable, system_sample_time);
-    Drive_udql.d = Drive_id_pi.output;
+    Drive_udq.d = Drive_id_pi.output;
 
     // q-axis
     Drive_iq_pi.ref = Drive_speed_pi.output;
     Drive_iq_pi.fdb = Drive_idq.q;
     PID_Calc(&Drive_iq_pi, system_enable, system_sample_time);
-    Drive_udql.q = Drive_iq_pi.output;
-
-    // voltage dq-to-ABC
-    // dq_2_abc(&Drive_udql, &Drive_uabcl, Drive_AD2S.Electrical_Angle);
+    Drive_udq.q = Drive_iq_pi.output;
 
     /************************************************************
      * @brief   SVPWM
      */
-    Drive_udq.d = Drive_udql.d;
-    Drive_udq.q = Drive_udql.q;
     dq_2_abc(&Drive_udq, &Drive_uabc, Drive_AD2S.Electrical_Angle);
-    e_svpwm(&Drive_uabc, 201, &Drive_duty_abc);
+    e_svpwm(&Drive_uabc, 101, &Drive_duty_abc);
+}
+
+static void load_foc_calc(void)
+{
+    /************************************************************
+     * @brief   FOC Caculate
+     */
+
+    // Current loop
+    // current ABC-to-dq
+    abc_2_dq(&Load_iabc, &Load_idq, Load_AD2S.Electrical_Angle);
+
+    // (id=0 control)Current PI Controller
+    // d-axis
+    Load_id_pi.ref = 0;
+    Load_id_pi.fdb = Load_idq.d;
+    PID_Calc(&Load_id_pi, system_enable, system_sample_time);
+    Load_udq.d = Load_id_pi.output;
+
+    // q-axis
+    Load_iq_pi.ref = load_iq_ref;
+    Load_iq_pi.fdb = Load_idq.q;
+    PID_Calc(&Load_iq_pi, system_enable, system_sample_time);
+    Load_udq.q = Load_iq_pi.output;
+
+    /************************************************************
+     * @brief   SVPWM
+     */
+    dq_2_abc(&Load_udq, &Load_uabc, Load_AD2S.Electrical_Angle);
+    e_svpwm(&Load_uabc, 101, &Load_duty_abc);
 }
 
 /**
@@ -189,47 +228,67 @@ static void foc_calc(void)
  */
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
-    static int adc_cnt               = 0;
-    static uint32_t adc_u_offset_sum = 0;
-    static uint32_t adc_v_offset_sum = 0;
-    HAL_GPIO_WritePin(GPIOF, GPIO_PIN_3, 0); // Caculate running time
+    static int adc_cnt                = 0;
+    static uint32_t adc_u1_offset_sum = 0;
+    static uint32_t adc_v1_offset_sum = 0;
+    static uint32_t adc_u2_offset_sum = 0;
+    static uint32_t adc_v2_offset_sum = 0;
+    HAL_GPIO_WritePin(GPIOF, GPIO_PIN_4, 0); // Caculate running time
     UNUSED(hadc);
     /**********************************
-     * @brief   Current sample
+     * @brief   Sample
      */
     if (hadc == &hadc1) {
         // Read Offset
         if (Drive_curr.sample_flag == CURR_SAMPLE_GET_OFFSET) {
-            adc_u_offset_sum += hadc1.Instance->JDR1;
-            adc_v_offset_sum += hadc1.Instance->JDR2;
+            adc_u1_offset_sum += hadc1.Instance->JDR1;
+            adc_v1_offset_sum += hadc1.Instance->JDR2;
+            adc_u2_offset_sum += hadc1.Instance->JDR3;
+            adc_v2_offset_sum += hadc1.Instance->JDR4;
             adc_cnt++;
             if (adc_cnt == 20) {
                 adc_cnt                     = 0;
-                Drive_curr.adc_val_u_offset = adc_u_offset_sum / 20.0f;
-                Drive_curr.adc_val_v_offset = adc_v_offset_sum / 20.0f;
+                Drive_curr.adc_val_u_offset = adc_u1_offset_sum / 20.0f;
+                Drive_curr.adc_val_v_offset = adc_v1_offset_sum / 20.0f;
                 Drive_curr.sample_flag      = CURR_SAMPLE_RUNNING;
-                adc_u_offset_sum            = 0;
-                adc_v_offset_sum            = 0;
+                adc_u1_offset_sum           = 0;
+                adc_v1_offset_sum           = 0;
+                Load_curr.adc_val_u_offset  = adc_u2_offset_sum / 20.0f;
+                Load_curr.adc_val_v_offset  = adc_v2_offset_sum / 20.0f;
+                Load_curr.sample_flag       = CURR_SAMPLE_RUNNING;
+                adc_u2_offset_sum           = 0;
+                adc_v2_offset_sum           = 0;
             }
         }
         // Read Current
         else {
             Drive_curr.adc_val_u = hadc1.Instance->JDR1;
             Drive_curr.adc_val_v = hadc1.Instance->JDR2;
+            Load_curr.adc_val_u  = hadc1.Instance->JDR3;
+            Load_curr.adc_val_v  = hadc1.Instance->JDR4;
             adc_2_curr(&Drive_curr);
+            adc_2_curr(&Load_curr);
             Drive_iabc.a = Drive_curr.curr_u;
             Drive_iabc.b = Drive_curr.curr_v;
             Drive_iabc.c = Drive_curr.curr_w;
+            Load_iabc.a  = Load_curr.curr_u;
+            Load_iabc.b  = Load_curr.curr_v;
+            Load_iabc.c  = Load_curr.curr_w;
             // software protection
-            if ((Drive_iabc.a * Drive_iabc.a > 1.3 * 1.3) || (Drive_iabc.b * Drive_iabc.b > 1.3 * 1.3) || (Drive_iabc.c * Drive_iabc.c > 1.3 * 1.3)) {
+            if ((Drive_iabc.a * Drive_iabc.a > MAX_CURRENT * MAX_CURRENT) || (Drive_iabc.b * Drive_iabc.b > MAX_CURRENT * MAX_CURRENT) || (Drive_iabc.c * Drive_iabc.c > MAX_CURRENT * MAX_CURRENT) || (Load_iabc.a * Load_iabc.a > MAX_CURRENT * MAX_CURRENT) || (Load_iabc.b * Load_iabc.b > MAX_CURRENT * MAX_CURRENT) || (Load_iabc.c * Load_iabc.c > MAX_CURRENT * MAX_CURRENT)) {
                 system_enable = 0;
             }
         }
     }
+    // Angle and Speed Sample
+    AD2S1210_Angle_Get();                   // Angle Sample
+    AD2S1210_Speed_Get(system_sample_time); // Speed Sample
     /**********************************
      * @brief   FOC Calculate
      */
-    foc_calc();
+    drive_foc_calc();
+    load_foc_calc();
+
     /**********************************
      * @brief   Voltage-Source Inverter Control
      */
@@ -237,13 +296,19 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         TIM8->CCR1 = 0;
         TIM8->CCR2 = 0;
         TIM8->CCR3 = 0;
+        TIM1->CCR1 = 0;
+        TIM1->CCR2 = 0;
+        TIM1->CCR3 = 0;
     } else {
         TIM8->CCR1 = Drive_duty_abc.dutya * TIM8->ARR;
         TIM8->CCR2 = Drive_duty_abc.dutyb * TIM8->ARR;
         TIM8->CCR3 = Drive_duty_abc.dutyc * TIM8->ARR;
+        TIM1->CCR1 = Load_duty_abc.dutya * TIM1->ARR;
+        TIM1->CCR2 = Load_duty_abc.dutyb * TIM1->ARR;
+        TIM1->CCR3 = Load_duty_abc.dutyc * TIM1->ARR;
     }
 
-    HAL_GPIO_WritePin(GPIOF, GPIO_PIN_3, 1); // Caculate running time
+    HAL_GPIO_WritePin(GPIOF, GPIO_PIN_4, 1); // Caculate running time
 }
 
 /**

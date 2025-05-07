@@ -90,7 +90,7 @@ extern "C" {
 
 #include "stm32h7xx.h"
 #include "my_math.h"
-#if(Hardware_SPI == 1)
+#if (Hardware_SPI == 1)
 #include "spi.h"
 #endif
 
@@ -112,22 +112,35 @@ extern "C" {
 #define AD2S1210_FAULT                 0XFF // 故障
 
 /********************************** 引脚定义 ************************************ */
-#define A0_H  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET)
-#define A0_L  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET)
-#define A1_H  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET)
-#define A1_L  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET)
-#define CS1_H HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_SET)
-#define CS1_L HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_RESET)
-// #define CS2_H    	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5, GPIO_PIN_SET)
-// #define CS2_L    	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5, GPIO_PIN_RESET)
-#define SMAPLE_H HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_SET)
-#define SMAPLE_L HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET)
-#define RESET_H  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET) // 新动力板子高复位
-#define RESET_L  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET)
-#define WR_H     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_SET) // SPI1_CS
-#define WR_L     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET)
-#define DIR_H    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET)
-#define DIR_L    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET)
+#define A0_H1     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET)
+#define A0_L1     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET)
+#define A1_H1     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET)
+#define A1_L1     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET)
+#define CS_H1     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_SET)
+#define CS_L1     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_RESET)
+#define SMAPLE_H1 HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_SET)
+#define SMAPLE_L1 HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0, GPIO_PIN_RESET)
+#define RESET_H1  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, GPIO_PIN_SET) // 新动力板子高复位
+#define RESET_L1  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, GPIO_PIN_RESET)
+#define WR_H1     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_SET) // SPI1_CS
+#define WR_L1     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET)
+#define DIR_H1    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET)
+#define DIR_L1    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET)
+
+#define A0_H2     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET)
+#define A0_L2     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET)
+#define A1_H2     HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET)
+#define A1_L2     HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET)
+#define CS_H2     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10, GPIO_PIN_SET)
+#define CS_L2     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10, GPIO_PIN_RESET)
+#define SMAPLE_H2 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET)
+#define SMAPLE_L2 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET)
+#define RESET_H2  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET) // 新动力板子高复位
+#define RESET_L2  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET)
+#define WR_H2     HAL_GPIO_WritePin(GPIOE, GPIO_PIN_1, GPIO_PIN_SET) // SPI2_CS
+#define WR_L2     HAL_GPIO_WritePin(GPIOE, GPIO_PIN_1, GPIO_PIN_RESET)
+#define DIR_H2    HAL_GPIO_WritePin(GPIOE, GPIO_PIN_0, GPIO_PIN_RESET)
+#define DIR_L2    HAL_GPIO_WritePin(GPIOE, GPIO_PIN_0, GPIO_PIN_RESET)
 
 /********************************** 结构体定义 ************************************ */
 
@@ -152,6 +165,16 @@ typedef enum {
     CONFIG
 } AD2S1210_CONTROL_MOD_ENUM;
 
+typedef struct
+{
+    int position_data1;
+    int position_data2;
+    int velocity_data1;
+    int velocity_data2;
+    uint8_t fault1;
+    uint8_t fault2;
+} SPI_readresult;
+
 typedef enum {
     ONE,
     TWO,
@@ -160,7 +183,8 @@ typedef enum {
 
 /********************************** 用户接口定义 ************************************ */
 
-extern ad2s1210_t Load_AD2S; // 单块 AD2S1210 的数据结构体
+extern ad2s1210_t Load_AD2S;
+extern ad2s1210_t Drive_AD2S;
 
 /********************************** 函数定义 ************************************ */
 
@@ -169,14 +193,14 @@ void AD2S1210_ModeSelect(AD2S1210_CONTROL_MOD_ENUM mode); // 选择控制模式�
 void AD2S1210_ChipSelect(AD2S1210_CHIP_ENUM index);       // 选择哪个旋变，多个旋变时，自行增加代码内容
 void AD2S1210_HW_RESET(void);                             // 硬件重启初始化
 
-int AD2S1210_ReadPosition(AD2S1210_CHIP_ENUM index); // 使用前需要先确保A0A1模式匹配
-int AD2S1210_ReadVelocity(AD2S1210_CHIP_ENUM index); // 使用前需要先确保A0A1模式匹配
-unsigned char AD2S1210_ReadFault(void);              // 使用前需要先确保A0A1模式匹配(普通模式)
+SPI_readresult AD2S1210_ReadPosition(AD2S1210_CHIP_ENUM index); // 使用前需要先确保A0A1模式匹配
+SPI_readresult AD2S1210_ReadVelocity(AD2S1210_CHIP_ENUM index); // 使用前需要先确保A0A1模式匹配
+SPI_readresult AD2S1210_ReadFault(void);              // 使用前需要先确保A0A1模式匹配(普通模式)
 
-unsigned char AD2S1210_ReadRegister(AD2S1210_CHIP_ENUM index, unsigned char addr); // 使用前需要先确保A0A1模式匹配,配置模式
-void AD2S1210_WriteRegister(unsigned char addr, unsigned char data);               // 使用前需要先确保A0A1模式匹配,配置模式
+unsigned char AD2S1210_ReadRegister(AD2S1210_CHIP_ENUM index, SPI_HandleTypeDef *hspi, unsigned char addr) ; // 使用前需要先确保A0A1模式匹配,配置模式
+void AD2S1210_WriteRegister(SPI_HandleTypeDef *hspi, unsigned char addr, unsigned char data);               // 使用前需要先确保A0A1模式匹配,配置模式
 
-unsigned char AD2S1210_GetFault(AD2S1210_CHIP_ENUM index); // 故障发生时用于读取故障
+unsigned char AD2S1210_GetFault(AD2S1210_CHIP_ENUM index, SPI_HandleTypeDef *hspi); // 故障发生时用于读取故障
 
 void AD2S1210_para_Init(void);
 void AD2S1210_Angle_Get(void);
