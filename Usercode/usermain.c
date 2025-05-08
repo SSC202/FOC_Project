@@ -28,7 +28,7 @@ static void init(void)
     Drive_curr.sample_flag      = CURR_SAMPLE_GET_OFFSET; // Read ADC Offset
     PID_init(&Drive_id_pi, 0.005, 12.5, 0, 80);           // Current PI Init
     PID_init(&Drive_iq_pi, 0.005, 12.5, 0, 80);
-    PID_init(&Drive_speed_pi, 0.1, 0.1, 0, 1); // Speed PI Init
+    PID_init(&Drive_speed_pi, 0.1, 100, 0, 2); // Speed PI Init
     // Userinit
     user_init();
     // Load Motor
