@@ -195,6 +195,15 @@
         "files": [
           {
             "path": "Usercode/usermain.c"
+          },
+          {
+            "path": "Usercode/drivefoc.c"
+          },
+          {
+            "path": "Usercode/userinit.c"
+          },
+          {
+            "path": "Usercode/userpara.c"
           }
         ],
         "folders": []

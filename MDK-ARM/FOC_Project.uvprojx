@@ -633,6 +633,21 @@
               <FileType>1</FileType>
               <FilePath>..\Usercode\usermain.c</FilePath>
             </File>
+            <File>
+              <FileName>drivefoc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Usercode\drivefoc.c</FilePath>
+            </File>
+            <File>
+              <FileName>userinit.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Usercode\userinit.c</FilePath>
+            </File>
+            <File>
+              <FileName>userpara.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Usercode\userpara.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

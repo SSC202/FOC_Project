@@ -19,6 +19,11 @@
 // 编码器相关文件
 #include "ad2s1210.h"
 
+// 用户相关文件
+#include "userpara.h"
+#include "userinit.h"
+#include "drivefoc.h"
+
 void usermain(void);
 
 #endif
