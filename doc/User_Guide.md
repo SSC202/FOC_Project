@@ -255,75 +255,6 @@ static void init(void)
 
 ```c
 /**
- * @brief   Drive Motor FOC Control caculate, use it in interrupt
- */
-static void drive_foc_calc(void)
-{
-    /************************************************************
-     * @brief   FOC Caculate
-     */
-
-    // Speed loop
-    Drive_speed_pi.ref = drive_speed_ref;
-    // Drive_speed_pi.fdb = Drive_AD2S.Speed;
-    Drive_speed_pi.fdb = Drive_AD2S.Speed;
-    PID_Calc(&Drive_speed_pi, system_enable, system_sample_time);
-
-    // Current loop
-    // current ABC-to-dq
-    abc_2_dq(&Drive_iabc, &Drive_idq, Drive_AD2S.Electrical_Angle);
-
-    // (id=0 control)Current PI Controller
-    // d-axis
-    Drive_id_pi.ref = 0;
-    Drive_id_pi.fdb = Drive_idq.d;
-    PID_Calc(&Drive_id_pi, system_enable, system_sample_time);
-    Drive_udq.d = Drive_id_pi.output;
-
-    // q-axis
-    Drive_iq_pi.ref = Drive_speed_pi.output;
-    Drive_iq_pi.fdb = Drive_idq.q;
-    PID_Calc(&Drive_iq_pi, system_enable, system_sample_time);
-    Drive_udq.q = Drive_iq_pi.output;
-
-    /************************************************************
-     * @brief   SVPWM
-     */
-    dq_2_abc(&Drive_udq, &Drive_uabc, Drive_AD2S.Electrical_Angle);
-    e_svpwm(&Drive_uabc, 101, &Drive_duty_abc);
-}
-
-static void load_foc_calc(void)
-{
-    /************************************************************
-     * @brief   FOC Caculate
-     */
-
-    // Current loop
-    // current ABC-to-dq
-    abc_2_dq(&Load_iabc, &Load_idq, Load_AD2S.Electrical_Angle);
-
-    // (id=0 control)Current PI Controller
-    // d-axis
-    Load_id_pi.ref = 0;
-    Load_id_pi.fdb = Load_idq.d;
-    PID_Calc(&Load_id_pi, system_enable, system_sample_time);
-    Load_udq.d = Load_id_pi.output;
-
-    // q-axis
-    Load_iq_pi.ref = load_iq_ref;
-    Load_iq_pi.fdb = Load_idq.q;
-    PID_Calc(&Load_iq_pi, system_enable, system_sample_time);
-    Load_udq.q = Load_iq_pi.output;
-
-    /************************************************************
-     * @brief   SVPWM
-     */
-    dq_2_abc(&Load_udq, &Load_uabc, Load_AD2S.Electrical_Angle);
-    e_svpwm(&Load_uabc, 101, &Load_duty_abc);
-}
-
-/**
  * @brief   ADC Injected Channel interrupt Callback function
  */
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
@@ -426,3 +357,26 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 >
 > - 配置模式2
 >  ![NULL](./assets/picture_23.jpg)
+
+## 2. 用户编写代码
+
+用户应当在 `userpara.c`/`userpara.h`，`drivefoc.c`/`drivefoc.h`，`userinit.c`/`userinit.h` 三组文件中编写用户自定义代码。
+
+### `userpara.c/h` 文件
+
+该文件进行全局变量定义，将全局变量单独列出一个文件以便于调试时观察变量。
+
+### `userinit.c/h` 文件
+
+该文件内是用户代码参数初始化函数 `user_init()`。
+
+用户在该函数内编写代码以便进行算法参数初始化。
+
+### `drivefoc.c/h` 文件
+
+该文件内是用于进行驱动电机 FOC 算法的函数 `drive_foc_calc()`。
+
+用户在该函数内编写**针对驱动电机的无感算法**。
+
+
+
