@@ -84,8 +84,6 @@ void usermain(void)
     }
 }
 
-
-
 static void load_foc_calc(void)
 {
     /************************************************************
@@ -168,7 +166,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
             Load_iabc.b  = Load_curr.curr_v;
             Load_iabc.c  = Load_curr.curr_w;
             // software protection
-            if ((Drive_iabc.a * Drive_iabc.a > MAX_CURRENT * MAX_CURRENT) || (Drive_iabc.b * Drive_iabc.b > MAX_CURRENT * MAX_CURRENT) || (Drive_iabc.c * Drive_iabc.c > MAX_CURRENT * MAX_CURRENT) || (Load_iabc.a * Load_iabc.a > MAX_CURRENT * MAX_CURRENT) || (Load_iabc.b * Load_iabc.b > MAX_CURRENT * MAX_CURRENT) || (Load_iabc.c * Load_iabc.c > MAX_CURRENT * MAX_CURRENT)) {
+            if ((Drive_iabc.a * Drive_iabc.a > DRIVE_MAX_CURRENT * DRIVE_MAX_CURRENT) || (Drive_iabc.b * Drive_iabc.b > DRIVE_MAX_CURRENT * DRIVE_MAX_CURRENT) || (Drive_iabc.c * Drive_iabc.c > DRIVE_MAX_CURRENT * DRIVE_MAX_CURRENT) || (Load_iabc.a * Load_iabc.a > LOAD_MAX_CURRENT * LOAD_MAX_CURRENT) || (Load_iabc.b * Load_iabc.b > LOAD_MAX_CURRENT * LOAD_MAX_CURRENT) || (Load_iabc.c * Load_iabc.c > LOAD_MAX_CURRENT * LOAD_MAX_CURRENT)) {
                 system_enable = 0;
             }
         }

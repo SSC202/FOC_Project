@@ -6,8 +6,11 @@
 /******************************************************
  * @brief   运行相关的参数,结合 CubeMX 进行定义
  */
-#ifndef MAX_CURRENT
-#define MAX_CURRENT        1.8f    // 电流限制
+#ifndef DRIVE_MAX_CURRENT
+#define DRIVE_MAX_CURRENT 1.8f // 电流限制
+#endif
+#ifndef LOAD_MAX_CURRENT
+#define LOAD_MAX_CURRENT 3.0f // 电流限制
 #endif
 #ifndef SYSTEM_SAMPLE_TIME
 #define SYSTEM_SAMPLE_TIME 0.0001f // 系统采样时间,根据 CubeMX 配置
