@@ -208,5 +208,6 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM8) {
+        HAL_GPIO_TogglePin(GPIOF, GPIO_PIN_5);
     }
 }

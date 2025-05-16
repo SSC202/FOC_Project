@@ -12,23 +12,23 @@ void HFI_Inject(HFI_t *hfi)
     } else {
         switch (hfi->step) {
             case 1:
-                hfi->udq_h.d = hfi->u_h;
-                hfi->udq_h.q = 0;
+                hfi->udq_h.d = hfi->u_h * cosf(hfi->theta_inj);
+                hfi->udq_h.q = hfi->u_h * sinf(hfi->theta_inj);
                 hfi->step    = 2;
                 break;
             case 2:
-                hfi->udq_h.d = hfi->u_h;
-                hfi->udq_h.q = 0;
+                hfi->udq_h.d = hfi->u_h * cosf(hfi->theta_inj);
+                hfi->udq_h.q = hfi->u_h * sinf(hfi->theta_inj);
                 hfi->step    = 3;
                 break;
             case 3:
-                hfi->udq_h.d = -hfi->u_h;
-                hfi->udq_h.q = 0;
+                hfi->udq_h.d = -hfi->u_h * cosf(hfi->theta_inj);
+                hfi->udq_h.q = -hfi->u_h * sinf(hfi->theta_inj);
                 hfi->step    = 4;
                 break;
             case 4:
-                hfi->udq_h.d = -hfi->u_h;
-                hfi->udq_h.q = 0;
+                hfi->udq_h.d = -hfi->u_h * cosf(hfi->theta_inj);
+                hfi->udq_h.q = -hfi->u_h * sinf(hfi->theta_inj);
                 hfi->step    = 1;
                 break;
             default:
@@ -64,15 +64,24 @@ static void HFI_demodulate(HFI_t *hfi)
  */
 static void HFI_observe(HFI_t *hfi)
 {
+    // 不使能时采用有感运行数据
     if (hfi->enable == 0) {
         hfi->speed_obs = hfi->speed_true;
-    } else {
-        hfi->speed_obs = hfi->speed_lpf.output;
     }
     if (hfi->enable == 0) {
         hfi->theta_obs = hfi->theta_true;
     }
+    if (hfi->enable == 0) {
+        hfi->pll.ref               = 0;
+        hfi->pll.fdb               = 0;
+        hfi->pll.cur_error         = 0;
+        hfi->pll.output            = 0;
+        hfi->speed_lpf.input       = 0;
+        hfi->speed_lpf.output      = 0;
+        hfi->speed_lpf.output_last = 0;
+    }
 
+    // 使能时采用无感数据
     if (hfi->step == 2 || hfi->step == 4) {
         // PLL Caculate
         hfi->pll.ref = hfi->isig;
@@ -82,6 +91,7 @@ static void HFI_observe(HFI_t *hfi)
         // Speed LPF
         hfi->speed_lpf.input = hfi->pll.output;
         LPF_Calc(&hfi->speed_lpf, hfi->enable);
+        hfi->speed_obs = hfi->speed_lpf.output;
 
         // Theta
         hfi->theta_obs += hfi->pll.output * hfi->sample_time;
