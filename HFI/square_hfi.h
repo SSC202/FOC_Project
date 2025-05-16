@@ -8,6 +8,8 @@ typedef struct
 {
     // Init Parameters 初始化相关参数
     float u_h;         // 注入电压
+    float theta_inj;   // 注入角度
+    float offset;      // 变轴系信号偏置
     float sample_time; // 采样时间
     PID_t pll;         // 锁相环
     LPF_t speed_lpf;   // 速度低通滤波器
@@ -28,12 +30,12 @@ typedef struct
 
     // Temporary variables 临时变量
     dq_t idq_h[4]; // 高频注入电流
-    float isig;     // 解调后信号
-
+    float isig;    // 解调后信号
+    float icomp;   // 偏置信号
 } HFI_t;
 
 void HFI_Inject(HFI_t *hfi); // 电压注入
 void HFI_Calc(HFI_t *hfi);   // 信号解调并进行位置观测
-void HFI_Init(HFI_t *hfi, float uh, float ts, float kp, float ki, float fc);
+void HFI_Init(HFI_t *hfi, float uh, float ts, float kp, float ki, float fc, float offset);
 
 #endif

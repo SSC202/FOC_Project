@@ -45,13 +45,17 @@ void HFI_Inject(HFI_t *hfi)
  */
 static void HFI_demodulate(HFI_t *hfi)
 {
+    static float id_sig, iq_sig;
     // Update Current
     (hfi->idq_h[hfi->step - 1]).d = hfi->idqh_now.d;
     (hfi->idq_h[hfi->step - 1]).q = hfi->idqh_now.q;
 
     // demodulate
     if (hfi->step == 2 || hfi->step == 4) {
-        hfi->isig = (hfi->idq_h)[3].q - (hfi->idq_h)[1].q;
+        iq_sig     = (hfi->idq_h)[3].q - (hfi->idq_h)[1].q;
+        id_sig     = (hfi->idq_h)[3].d - (hfi->idq_h)[1].d;
+        hfi->icomp = hfi->u_h * hfi->offset * sinf(2 * hfi->theta_inj);
+        hfi->isig  = id_sig * sinf(hfi->theta_inj) + iq_sig * cosf(hfi->theta_inj) - hfi->icomp;
     }
 }
 
@@ -111,10 +115,12 @@ void HFI_Calc(HFI_t *hfi)
  * @param   ki      PLL ki
  * @param   fc      Speed LPF fc
  */
-void HFI_Init(HFI_t *hfi, float uh, float ts, float kp, float ki, float fc)
+void HFI_Init(HFI_t *hfi, float uh, float ts, float kp, float ki, float fc, float offset)
 {
     hfi->u_h         = uh;
+    hfi->theta_inj   = 0;
     hfi->sample_time = ts;
+    hfi->offset      = offset; // 变轴系信号偏置
 
     PID_init(&hfi->pll, kp, ki, 0, INFINITY);
 
