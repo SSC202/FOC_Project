@@ -1,7 +1,13 @@
 #ifndef __USERPARA_H
 #define __USERPARA_H
 
-#include "usermain.h"
+#include "coordinate_transform.h"
+#include "svpwm.h"
+#include "curr_sample.h"
+#include "ad2s1210.h"
+/** User include **/
+
+/** End Include **/
 
 /******************************************************
  * @brief   运行相关的参数,结合 CubeMX 进行定义
