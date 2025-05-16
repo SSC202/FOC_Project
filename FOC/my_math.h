@@ -68,7 +68,7 @@ void PID_init(PID_t *pid, float kp, float ki, float kd, float outputMax);
 void PID_Calc(PID_t *pid, uint8_t enable, float t_sample);
 
 void LPF_Init(LPF_t *lpf, float f_c, float t_sample);
-void LPF_Calc(LPF_t *lpf);
+void LPF_Calc(LPF_t *lpf, uint8_t enable);
 
 float fast_sin(float x);
 float fast_cos(float x);

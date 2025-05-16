@@ -158,25 +158,40 @@
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>drive_speed_ref</ItemText>
+          <ItemText>Drive_hfi.enable,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>load_iq_ref</ItemText>
+          <ItemText>drive_speed_ref</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Load_AD2S</ItemText>
+          <ItemText>load_iq_ref</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Drive_AD2S</ItemText>
+          <ItemText>Drive_AD2S,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Drive_hfi,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>6</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Drive_curr,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>7</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Load_curr,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>8</count>
           <WinNumber>1</WinNumber>
           <ItemText>system_print,0x0A</ItemText>
         </Ww>
@@ -848,6 +863,26 @@
       <bDave2>0</bDave2>
       <PathWithFileName>..\Usercode\userpara.c</PathWithFileName>
       <FilenameWithoutPath>userpara.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+  </Group>
+
+  <Group>
+    <GroupName>HFI</GroupName>
+    <tvExp>1</tvExp>
+    <tvExpOptDlg>0</tvExpOptDlg>
+    <cbSel>0</cbSel>
+    <RteFlg>0</RteFlg>
+    <File>
+      <GroupNumber>8</GroupNumber>
+      <FileNumber>48</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\HFI\square_hfi.c</PathWithFileName>
+      <FilenameWithoutPath>square_hfi.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

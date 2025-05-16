@@ -398,7 +398,7 @@ void PID_Calc(PID_t *pid, uint8_t enable, float t_sample)
 {
     pid->ref       = pid->ref * enable;
     pid->fdb       = pid->fdb * enable;
-    pid->cur_error = pid->ref - pid->fdb;
+    pid->cur_error = (pid->ref - pid->fdb) * enable;
     pid->output += pid->KP * (pid->cur_error - pid->error[1]) + pid->KI * t_sample * pid->cur_error + pid->KD * (pid->cur_error - 2 * pid->error[1] + pid->error[0]);
     pid->output   = pid->output * enable;
     pid->error[0] = pid->error[1];
@@ -430,9 +430,10 @@ void LPF_Init(LPF_t *lpf, float f_c, float t_sample)
  * @brief   数字一阶低通滤波器计算(后向差分法)
  * @param   lpf         滤波器句柄
  */
-void LPF_Calc(LPF_t *lpf)
+void LPF_Calc(LPF_t *lpf, uint8_t enable)
 {
+    lpf->input       = lpf->input * enable;
     lpf->output      = lpf->output_last + lpf->alpha * (lpf->input - lpf->output_last);
+    lpf->output      = lpf->output * enable;
     lpf->output_last = lpf->output;
 }
-
