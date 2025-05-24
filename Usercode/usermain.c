@@ -181,6 +181,12 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
     load_foc_calc();
 
     /**********************************
+     * @brief   DAC Value
+     */
+    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, u_dac_value1);
+    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_2, DAC_ALIGN_12B_R, u_dac_value2);
+
+    /**********************************
      * @brief   Voltage-Source Inverter Control
      */
     if (system_enable == 0) {

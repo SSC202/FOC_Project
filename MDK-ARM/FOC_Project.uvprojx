@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_PWR_LDO_SUPPLY,USE_HAL_DRIVER,STM32H723xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../FOC;../Encoder;../Usercode</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../FOC;../Encoder;../Usercode;../HFI</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -647,6 +647,16 @@
               <FileName>userpara.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Usercode\userpara.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>HFI</GroupName>
+          <Files>
+            <File>
+              <FileName>rotate_hfi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HFI\rotate_hfi.c</FilePath>
             </File>
           </Files>
         </Group>
