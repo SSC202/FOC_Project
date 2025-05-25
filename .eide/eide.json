@@ -362,6 +362,7 @@
           "Drivers/CMSIS/Device/ST/STM32H7xx/Include",
           "Drivers/CMSIS/Include",
           "FOC",
+          "HFI",
           "Encoder",
           "Usercode",
           ".cmsis/include",
