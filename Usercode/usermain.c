@@ -50,6 +50,7 @@ static void init(void)
     }
     // DAC Init
     HAL_DAC_Start(&hdac1, DAC1_CHANNEL_1);
+    HAL_DAC_Start(&hdac1, DAC1_CHANNEL_2);
     // Open Inverter
     HAL_TIM_Base_Start_IT(&htim8);
     HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
@@ -76,10 +77,10 @@ void usermain(void)
         // DAC Print
         // Usart Print
         if (system_print == 0) {
-            printf("U:%f\r\n", Drive_AD2S.Electrical_Angle);
+            printf("re; obs; err: %f,%f,%f\n", Drive_AD2S.Electrical_Angle, Drive_hfi.theta_obs, Drive_hfi.theta_error);
         }
         if (system_print == 1) {
-            printf("U:%f\r\n", Drive_AD2S.Speed);
+            printf("re; obs; err: %f,%f,%f\n", Drive_AD2S.Speed, Drive_hfi.speed_obs, Drive_hfi.speed_error);
         }
     }
 }
@@ -111,7 +112,7 @@ static void load_foc_calc(void)
      * @brief   SVPWM
      */
     dq_2_abc(&Load_udq, &Load_uabc, Load_AD2S.Electrical_Angle);
-    e_svpwm(&Load_uabc, 101, &Load_duty_abc);
+    e_svpwm(&Load_uabc, 201, &Load_duty_abc);
 }
 
 /**

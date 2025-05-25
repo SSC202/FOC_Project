@@ -17,6 +17,8 @@ typedef struct
 
     uint8_t filter_type_1; // HPF1(z) type
     uint8_t filter_type_2; // HPF2(z) type
+    float HPF1_fc_ratio;         // HPF1(z) 截止频率比值
+    float HPF2_fc_ratio;         // HPF2(z) 截止频率比值
     float HPF1_fc;         // HPF1(z) 截止频率
     float HPF2_fc;         // HPF2(z) 截止频率
     HPF_t HPF1_alpha;      // alpha 轴 HPF1(z)

@@ -2,9 +2,7 @@
   "name": "FOC_Project",
   "type": "ARM",
   "dependenceList": [],
-  "srcDirs": [
-    "HFI"
-  ],
+  "srcDirs": [],
   "virtualFolder": {
     "name": "<virtual_root>",
     "files": [],
@@ -362,7 +360,6 @@
           "Drivers/CMSIS/Device/ST/STM32H7xx/Include",
           "Drivers/CMSIS/Include",
           "FOC",
-          "HFI",
           "Encoder",
           "Usercode",
           ".cmsis/include",

@@ -15,6 +15,8 @@ void drive_foc_calc(void)
     // HFI Calculate
     Drive_hfi.theta_true = Drive_AD2S.Electrical_Angle;
     Drive_hfi.speed_true = Drive_AD2S.Speed;
+    Drive_hfi.i_alpha_beta.alpha = Drive_ialphabeta.alpha;
+    Drive_hfi.i_alpha_beta.beta  = Drive_ialphabeta.beta;
     HFI_Calc(&Drive_hfi);
 
     /**
