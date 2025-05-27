@@ -105,4 +105,6 @@ extern HFI_t Drive_hfi;   // 驱动电机高频注入结构体
 extern dq_t Drive_udqh;   // 驱动电机估计 dq 轴高频指令电压
 extern abc_t Drive_uabch; // 驱动电机 ABC 相高频指令电压
 
+extern LPF_t Drive_ish_filter;
+
 #endif

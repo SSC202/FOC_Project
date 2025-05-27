@@ -77,9 +77,12 @@ void usermain(void)
         // Usart Print
         if (system_print == 0) {
             printf("U:%f,%f\r\n", Drive_AD2S.Electrical_Angle, Drive_hfi.theta_obs);
-        }
-        else if (system_print == 1) {
+        } else if (system_print == 1) {
             printf("U:%f,%f\r\n", Drive_AD2S.Speed, Drive_hfi.speed_obs);
+        } else if (system_print == 2) {
+            printf("U:%f,%f\r\n", Drive_ish_filter.output, Drive_hfi.ish);
+        } else if (system_print == 3) {
+            printf("U:%f\r\n", Drive_hfi.u_h);
         }
     }
 }

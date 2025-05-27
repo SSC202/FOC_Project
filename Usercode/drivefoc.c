@@ -74,6 +74,9 @@ void drive_foc_calc(void)
     Drive_udqh.q = Drive_hfi.udq_h.q;
     dq_2_abc(&Drive_udqh, &Drive_uabch, Drive_hfi.theta_obs);
 
+    Drive_ish_filter.input = Drive_hfi.ish_pi_controller.fdb;
+    LPF_Calc(&Drive_ish_filter, Drive_hfi.enable);
+
     /************************************************************
      * @brief   SVPWM
      */

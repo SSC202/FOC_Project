@@ -1,10 +1,53 @@
 #include "square_hfi.h"
+#include "my_math.h"
 
 /**
  * @brief   生成高频注入电压
  */
 void HFI_Inject(HFI_t *hfi)
 {
+    // 计算电流注入角度对应的电压注入角度
+    static float theta_inj;
+    theta_inj = atanf((110 / 55) * tanf(hfi->theta_inj_i));
+    while (theta_inj < -M_PI) {
+        theta_inj = theta_inj + 2 * M_PI;
+    }
+    while (theta_inj > M_PI) {
+        theta_inj = theta_inj - 2 * M_PI;
+    }
+    hfi->theta_inj = theta_inj;
+    // 高频信噪比控制器
+    static float id_sig, iq_sig;
+    static float i_sh;
+    iq_sig = (hfi->idq_h)[3].q - (hfi->idq_h)[1].q;
+    id_sig = (hfi->idq_h)[3].d - (hfi->idq_h)[1].d;
+    i_sh   = sqrt(iq_sig * iq_sig + id_sig * id_sig);
+
+    static float u_bias; // 信噪比控制器输出的电压控制指令
+    hfi->ish_pi_controller.ref = hfi->ish;
+    hfi->ish_pi_controller.fdb = i_sh;
+    if (hfi->enable == 0) {
+        hfi->ish_pi_controller.ref       = 0;
+        hfi->ish_pi_controller.fdb       = 0;
+        hfi->ish_pi_controller.cur_error = 0;
+        hfi->ish_pi_controller.output    = 0;
+    }
+    if (hfi->step == 2 || hfi->step == 4) {
+        PID_Calc(&hfi->ish_pi_controller, hfi->enable, hfi->sample_time);
+    }
+    u_bias = hfi->ish_pi_controller.output;
+
+    // 前馈补偿——高频阻抗曲线
+    static float z_n, u_href;
+    z_n      = (((0.0275f + 0.055f)) / 2.f) + (((0.055f - 0.0275f) / 2.f) * sinf(2 * (hfi->theta_inj_i) - (M_PI / 2)));
+    u_href   = 5000 * z_n * hfi->ish; // 5000 为实测倍率(2.5kHz注入)
+    hfi->u_h = u_bias + u_href;
+
+    if (hfi->u_h > 90) {
+        hfi->u_h = 90;
+    }
+
+    // 高频电压注入
     if (hfi->enable == 0) {
         hfi->step    = 1;
         hfi->udq_h.d = 0;
@@ -119,22 +162,24 @@ void HFI_Calc(HFI_t *hfi)
 /**
  * @brief   高频注入参数初始化
  * @param   hfi     高频注入结构体
- * @param   uh      高频注入电压幅值
+ * @param   ish     高频注入电流幅值
  * @param   ts      高频注入单次计算时间
  * @param   kp      PLL kp
  * @param   ki      PLL ki
  * @param   fc      Speed LPF fc
  */
-void HFI_Init(HFI_t *hfi, float uh, float ts, float kp, float ki, float fc, float offset)
+void HFI_Init(HFI_t *hfi, float ish, float ts, float kp, float ki, float fc, float offset)
 {
-    hfi->u_h         = uh;
-    hfi->theta_inj   = 0;
+    hfi->ish         = ish;
+    hfi->theta_inj_i = 0;
     hfi->sample_time = ts;
     hfi->offset      = offset; // 变轴系信号偏置
 
     PID_init(&hfi->pll, kp, ki, 0, INFINITY);
 
     LPF_Init(&hfi->speed_lpf, fc, hfi->sample_time);
+
+    PID_init(&hfi->ish_pi_controller, 0.1, 1000, 0, 20);
 
     hfi->enable = 0;
     hfi->step   = 1;

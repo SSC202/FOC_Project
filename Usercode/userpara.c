@@ -5,7 +5,7 @@
  */
 
 #define DRIVE_MAX_CURRENT  8.0f    // 驱动电机电流限制
-#define LOAD_MAX_CURRENT   20.0f    // 驱动电机电流限制
+#define LOAD_MAX_CURRENT   20.0f   // 驱动电机电流限制
 #define SYSTEM_SAMPLE_TIME 0.0001f // 系统采样时间,根据 CubeMX 配置
 
 uint8_t system_enable; // 系统使能参数,0为失能,1为使能
@@ -88,3 +88,5 @@ dq_t Drive_idqh;           // 驱动电机估计 dq 轴高频电流
 HFI_t Drive_hfi;   // 驱动电机高频注入结构体
 dq_t Drive_udqh;   // 驱动电机估计 dq 轴高频指令电压
 abc_t Drive_uabch; // 驱动电机 ABC 相高频指令电压
+
+LPF_t Drive_ish_filter;

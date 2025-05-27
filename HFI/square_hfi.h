@@ -7,12 +7,13 @@
 typedef struct
 {
     // Init Parameters 初始化相关参数
-    float u_h;         // 注入电压
-    float theta_inj;   // 注入角度
-    float offset;      // 变轴系信号偏置
-    float sample_time; // 采样时间
-    PID_t pll;         // 锁相环
-    LPF_t speed_lpf;   // 速度低通滤波器
+    float ish;               // 注入高频电流幅值
+    float theta_inj_i;       // 电流注入角度
+    float offset;            // 变轴系信号偏置
+    float sample_time;       // 采样时间
+    PID_t pll;               // 锁相环
+    LPF_t speed_lpf;         // 速度低通滤波器
+    PID_t ish_pi_controller; // 信噪比控制器
 
     // Control Parameters 运行控制相关参数
     uint8_t step;   // 运行步
@@ -29,13 +30,16 @@ typedef struct
     float speed_true; // 真实速度
 
     // Temporary variables 临时变量
-    dq_t idq_h[4]; // 高频注入电流
-    float isig;    // 解调后信号
-    float icomp;   // 偏置信号
+    float u_h;       // 注入电压
+    float theta_inj; // 电压注入角度
+    dq_t idq_h[4];   // 高频注入电流
+    float isig;      // 解调后信号
+    float icomp;     // 偏置信号
+    float ish_comp;  // 补偿倍数
 } HFI_t;
 
 void HFI_Inject(HFI_t *hfi); // 电压注入
 void HFI_Calc(HFI_t *hfi);   // 信号解调并进行位置观测
-void HFI_Init(HFI_t *hfi, float uh, float ts, float kp, float ki, float fc, float offset);
+void HFI_Init(HFI_t *hfi, float ish, float ts, float kp, float ki, float fc, float offset);
 
 #endif
