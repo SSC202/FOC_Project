@@ -16,6 +16,7 @@ void HFI_Inject(HFI_t *hfi)
         theta_inj = theta_inj - 2 * M_PI;
     }
     hfi->theta_inj = theta_inj;
+
     // 高频信噪比控制器
     static float id_sig, iq_sig;
     static float i_sh;
@@ -48,38 +49,36 @@ void HFI_Inject(HFI_t *hfi)
     }
 
     // 高频电压注入
+    switch (hfi->step) {
+        case 1:
+            hfi->udq_h.d = hfi->u_h * cosf(hfi->theta_inj);
+            hfi->udq_h.q = hfi->u_h * sinf(hfi->theta_inj);
+            hfi->step    = 2;
+            break;
+        case 2:
+            hfi->udq_h.d = hfi->u_h * cosf(hfi->theta_inj);
+            hfi->udq_h.q = hfi->u_h * sinf(hfi->theta_inj);
+            hfi->step    = 3;
+            break;
+        case 3:
+            hfi->udq_h.d = -hfi->u_h * cosf(hfi->theta_inj);
+            hfi->udq_h.q = -hfi->u_h * sinf(hfi->theta_inj);
+            hfi->step    = 4;
+            break;
+        case 4:
+            hfi->udq_h.d = -hfi->u_h * cosf(hfi->theta_inj);
+            hfi->udq_h.q = -hfi->u_h * sinf(hfi->theta_inj);
+            hfi->step    = 1;
+            break;
+        default:
+            hfi->udq_h.d = -hfi->u_h * cosf(hfi->theta_inj);
+            hfi->udq_h.q = -hfi->u_h * sinf(hfi->theta_inj);
+            hfi->step    = 1;
+            break;
+    }
     if (hfi->enable == 0) {
-        hfi->step    = 1;
         hfi->udq_h.d = 0;
         hfi->udq_h.q = 0;
-    } else {
-        switch (hfi->step) {
-            case 1:
-                hfi->udq_h.d = hfi->u_h * cosf(hfi->theta_inj);
-                hfi->udq_h.q = hfi->u_h * sinf(hfi->theta_inj);
-                hfi->step    = 2;
-                break;
-            case 2:
-                hfi->udq_h.d = hfi->u_h * cosf(hfi->theta_inj);
-                hfi->udq_h.q = hfi->u_h * sinf(hfi->theta_inj);
-                hfi->step    = 3;
-                break;
-            case 3:
-                hfi->udq_h.d = -hfi->u_h * cosf(hfi->theta_inj);
-                hfi->udq_h.q = -hfi->u_h * sinf(hfi->theta_inj);
-                hfi->step    = 4;
-                break;
-            case 4:
-                hfi->udq_h.d = -hfi->u_h * cosf(hfi->theta_inj);
-                hfi->udq_h.q = -hfi->u_h * sinf(hfi->theta_inj);
-                hfi->step    = 1;
-                break;
-            default:
-                hfi->step    = 1;
-                hfi->udq_h.d = 0;
-                hfi->udq_h.q = 0;
-                break;
-        }
     }
 }
 
@@ -107,23 +106,6 @@ static void HFI_demodulate(HFI_t *hfi)
  */
 static void HFI_observe(HFI_t *hfi)
 {
-    // 不使能时采用有感运行数据
-    if (hfi->enable == 0) {
-        hfi->speed_obs = hfi->speed_true;
-    }
-    if (hfi->enable == 0) {
-        hfi->theta_obs = hfi->theta_true;
-    }
-    if (hfi->enable == 0) {
-        hfi->pll.ref               = 0;
-        hfi->pll.fdb               = 0;
-        hfi->pll.cur_error         = 0;
-        hfi->pll.output            = 0;
-        hfi->speed_lpf.input       = 0;
-        hfi->speed_lpf.output      = 0;
-        hfi->speed_lpf.output_last = 0;
-    }
-
     // 使能时采用无感数据
     if (hfi->step == 2 || hfi->step == 4) {
         // PLL Caculate
@@ -145,6 +127,14 @@ static void HFI_observe(HFI_t *hfi)
         while (hfi->theta_obs > M_PI) {
             hfi->theta_obs = hfi->theta_obs - 2 * M_PI;
         }
+    }
+
+    // 不使能时采用有感运行数据
+    if (hfi->enable == 0) {
+        hfi->speed_obs = hfi->speed_true;
+    }
+    if (hfi->enable == 0) {
+        hfi->theta_obs = hfi->theta_true;
     }
 }
 
