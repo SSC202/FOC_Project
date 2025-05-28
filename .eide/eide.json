@@ -2,7 +2,9 @@
   "name": "FOC_Project",
   "type": "ARM",
   "dependenceList": [],
-  "srcDirs": [],
+  "srcDirs": [
+    "HFI"
+  ],
   "virtualFolder": {
     "name": "<virtual_root>",
     "files": [],
