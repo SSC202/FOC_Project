@@ -2,7 +2,9 @@
   "name": "FOC_Project",
   "type": "ARM",
   "dependenceList": [],
-  "srcDirs": [],
+  "srcDirs": [
+    "Hardwarecode"
+  ],
   "virtualFolder": {
     "name": "<virtual_root>",
     "files": [],
@@ -173,10 +175,10 @@
             "path": "FOC/curr_sample.c"
           },
           {
-            "path": "FOC/my_math.c"
+            "path": "FOC/svpwm.c"
           },
           {
-            "path": "FOC/svpwm.c"
+            "path": "FOC/foc_math.c"
           }
         ],
         "folders": []
@@ -204,6 +206,12 @@
           },
           {
             "path": "Usercode/userpara.c"
+          },
+          {
+            "path": "Usercode/loadfoc.c"
+          },
+          {
+            "path": "Usercode/user_transfunc.c"
           }
         ],
         "folders": []
@@ -223,7 +231,10 @@
   },
   "targets": {
     "FOC_Project": {
-      "excludeList": [],
+      "excludeList": [
+        "<virtual_root>/FOC/my_math.c",
+        "<virtual_root>/Usercode/hwinit.c"
+      ],
       "toolchain": "AC5",
       "compileConfig": {
         "cpuType": "Cortex-M7",
@@ -338,19 +349,31 @@
         },
         "options": "null"
       },
-      "uploader": "JLink",
+      "uploader": "STLink",
       "uploadConfig": {
         "bin": "",
-        "baseAddr": "",
-        "cpuInfo": {
-          "vendor": "null",
-          "cpuName": "null"
-        },
-        "proType": 1,
-        "speed": 8000,
+        "proType": "SWD",
+        "resetMode": "default",
+        "runAfterProgram": true,
+        "speed": 4000,
+        "address": "0x8000000",
+        "elFile": "None",
+        "optionBytes": ".eide/foc_project.st.option.bytes.ini",
         "otherCmds": ""
       },
-      "uploadConfigMap": {},
+      "uploadConfigMap": {
+        "JLink": {
+          "bin": "",
+          "baseAddr": "",
+          "cpuInfo": {
+            "vendor": "null",
+            "cpuName": "null"
+          },
+          "proType": 1,
+          "speed": 8000,
+          "otherCmds": ""
+        }
+      },
       "custom_dep": {
         "name": "default",
         "incList": [
@@ -360,6 +383,7 @@
           "Drivers/CMSIS/Device/ST/STM32H7xx/Include",
           "Drivers/CMSIS/Include",
           "FOC",
+          "Hardwarecode",
           "Encoder",
           "Usercode",
           ".cmsis/include",

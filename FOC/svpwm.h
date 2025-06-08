@@ -8,7 +8,7 @@
 #define __SVPWM_H
 
 #include "coordinate_transform.h"
-#include "my_math.h"
+#include "foc_math.h"
 
 typedef struct
 {

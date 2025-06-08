@@ -23,6 +23,12 @@
 #include "userpara.h"
 #include "userinit.h"
 #include "drivefoc.h"
+#include "loadfoc.h"
+
+#include "hwinit.h"
+#include "hwit.h"
+#include "hwdac.h"
+
 
 void usermain(void);
 

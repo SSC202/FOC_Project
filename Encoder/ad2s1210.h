@@ -89,7 +89,7 @@ extern "C" {
 #define Software_SPI 0 // 软件SPI
 
 #include "stm32h7xx.h"
-#include "my_math.h"
+#include "foc_math.h"
 #if (Hardware_SPI == 1)
 #include "spi.h"
 #endif

@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_PWR_LDO_SUPPLY,USE_HAL_DRIVER,STM32H723xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../FOC;../Encoder;../Usercode</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../FOC;../Encoder;../Usercode;../Hardwarecode</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -604,14 +604,14 @@
               <FilePath>..\FOC\curr_sample.c</FilePath>
             </File>
             <File>
-              <FileName>my_math.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\FOC\my_math.c</FilePath>
-            </File>
-            <File>
               <FileName>svpwm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\FOC\svpwm.c</FilePath>
+            </File>
+            <File>
+              <FileName>foc_math.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FOC\foc_math.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -647,6 +647,41 @@
               <FileName>userpara.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Usercode\userpara.c</FilePath>
+            </File>
+            <File>
+              <FileName>user_transfunc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Usercode\user_transfunc.c</FilePath>
+            </File>
+            <File>
+              <FileName>loadfoc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Usercode\loadfoc.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Hardwarecode</GroupName>
+          <Files>
+            <File>
+              <FileName>hwinit.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Hardwarecode\hwinit.c</FilePath>
+            </File>
+            <File>
+              <FileName>hwit.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Hardwarecode\hwit.c</FilePath>
+            </File>
+            <File>
+              <FileName>hwprint.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Hardwarecode\hwprint.c</FilePath>
+            </File>
+            <File>
+              <FileName>hwdac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Hardwarecode\hwdac.c</FilePath>
             </File>
           </Files>
         </Group>
