@@ -150,14 +150,14 @@ typedef struct
     float Electrical_Angle;
     float Electrical_Angle_offset;
     uint16_t Angle;
+
     uint8_t fluat_data;
     uint8_t Register_data;
-    float Speed;
-    float Current_Angle;
-    float Last_Angle;
-    float angle_diff;
-    float Current_Speed;
+
     int16_t Speed_read;
+    float Speed;
+    float Current_Speed;
+
 } ad2s1210_t;
 
 typedef enum {

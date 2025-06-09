@@ -2,7 +2,7 @@
 ADC1.ClockPrescaler=ADC_CLOCK_ASYNC_DIV4
 ADC1.EnableInjectedConversion=ENABLE
 ADC1.EnableRegularConversion=DISABLE
-ADC1.ExternalTrigInjecConv=ADC_EXTERNALTRIGINJEC_T8_CC4
+ADC1.ExternalTrigInjecConv=ADC_EXTERNALTRIGINJEC_T8_TRGO2
 ADC1.IPParameters=ClockPrescaler,EnableInjectedConversion,InjectedRank-1\#ChannelInjectedConversion,InjectedChannel-1\#ChannelInjectedConversion,InjectedSamplingTime-1\#ChannelInjectedConversion,InjectedOffsetNumber-1\#ChannelInjectedConversion,InjectedOffsetSignedSaturation-1\#ChannelInjectedConversion,InjectedOffsetSaturation-1\#ChannelInjectedConversion,InjNumberOfConversion,EnableRegularConversion,InjectedRank-2\#ChannelInjectedConversion,InjectedChannel-2\#ChannelInjectedConversion,InjectedSamplingTime-2\#ChannelInjectedConversion,InjectedOffsetNumber-2\#ChannelInjectedConversion,InjectedOffsetSignedSaturation-2\#ChannelInjectedConversion,InjectedOffsetSaturation-2\#ChannelInjectedConversion,ExternalTrigInjecConv,Resolution,master,InjectedRank-3\#ChannelInjectedConversion,InjectedChannel-3\#ChannelInjectedConversion,InjectedSamplingTime-3\#ChannelInjectedConversion,InjectedOffsetNumber-3\#ChannelInjectedConversion,InjectedOffsetSignedSaturation-3\#ChannelInjectedConversion,InjectedOffsetSaturation-3\#ChannelInjectedConversion,InjectedRank-4\#ChannelInjectedConversion,InjectedChannel-4\#ChannelInjectedConversion,InjectedSamplingTime-4\#ChannelInjectedConversion,InjectedOffsetNumber-4\#ChannelInjectedConversion,InjectedOffsetSignedSaturation-4\#ChannelInjectedConversion,InjectedOffsetSaturation-4\#ChannelInjectedConversion
 ADC1.InjNumberOfConversion=4
 ADC1.InjectedChannel-1\#ChannelInjectedConversion=ADC_CHANNEL_4
@@ -530,7 +530,7 @@ TIM8.Period=1250
 TIM8.Prescaler=11-1
 TIM8.Pulse-PWM\ Generation4\ No\ Output=1250-25
 TIM8.RepetitionCounter=1
-TIM8.TIM_MasterOutputTrigger2=TIM_TRGO2_OC4REF
+TIM8.TIM_MasterOutputTrigger2=TIM_TRGO2_UPDATE
 USART1.IPParameters=VirtualMode-Asynchronous
 USART1.VirtualMode-Asynchronous=VM_ASYNC
 VP_MEMORYMAP_VS_MEMORYMAP.Mode=CurAppReg

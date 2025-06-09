@@ -138,9 +138,6 @@ void AD2S1210_para_Init(void)
     Load_AD2S.fluat_data              = 0;
     Load_AD2S.Register_data           = 0;
     Load_AD2S.Speed                   = 0;
-    Load_AD2S.Current_Angle           = 0;
-    Load_AD2S.Last_Angle              = 0;
-    Load_AD2S.angle_diff              = 0;
     Load_AD2S.Current_Speed           = 0;
 
     Drive_AD2S.Mechanical_Angle        = 0;
@@ -150,9 +147,6 @@ void AD2S1210_para_Init(void)
     Drive_AD2S.fluat_data              = 0;
     Drive_AD2S.Register_data           = 0;
     Drive_AD2S.Speed                   = 0;
-    Drive_AD2S.Current_Angle           = 0;
-    Drive_AD2S.Last_Angle              = 0;
-    Drive_AD2S.angle_diff              = 0;
     Drive_AD2S.Current_Speed           = 0;
 }
 
@@ -370,7 +364,7 @@ void AD2S1210_Angle_Get(void)
 }
 
 /**
- * @brief   AD2S1210 读取电角速度
+ * @brief   AD2S1210 读取机械角速度
  */
 void AD2S1210_Speed_Get(void)
 {
@@ -383,6 +377,6 @@ void AD2S1210_Speed_Get(void)
 
     /***电机2***/
     Load_AD2S.Speed_read    = (int16_t)(res.velocity_data2);
-    Load_AD2S.Current_Speed = (float)(Load_AD2S.Speed_read * 0.329f); // 125*60/2^15
+    Load_AD2S.Current_Speed = -(float)(Load_AD2S.Speed_read * 0.329f); // 125*60/2^15
     Load_AD2S.Speed         = 0.01f * Load_AD2S.Current_Speed + 0.99f * Load_AD2S.Speed;
 }
