@@ -234,7 +234,7 @@ SPI_readresult AD2S1210_ReadPosition(AD2S1210_CHIP_ENUM index)
  * @attention   使用前需要先确保A0A1模式匹配(普通模式)
  * @param   index   选择旋变编号
  */
-SPI_readresult AD2S1210_ReadVelocity(AD2S1210_CHIP_ENUM index) 
+SPI_readresult AD2S1210_ReadVelocity(AD2S1210_CHIP_ENUM index)
 {
     SPI_readresult result = {0};
     AD2S1210_ChipSelect(index);
@@ -242,10 +242,10 @@ SPI_readresult AD2S1210_ReadVelocity(AD2S1210_CHIP_ENUM index)
     AD2S1210_DataRelease();
     /***SPI1***/
     result.velocity_data1 = SPI_ReadByte(&hspi1) << 8;
-    result.velocity_data2 += SPI_ReadByte(&hspi1);
+    result.velocity_data1 += SPI_ReadByte(&hspi1);
     /***SPI2***/
-    result.position_data2 = SPI_ReadByte(&hspi2) << 8; // 高八位
-    result.position_data2 += SPI_ReadByte(&hspi2);     // 低八位
+    result.velocity_data2 = SPI_ReadByte(&hspi2) << 8; // 高八位
+    result.velocity_data2 += SPI_ReadByte(&hspi2);     // 低八位
 
     AD2S1210_DataLock();
 
@@ -282,7 +282,7 @@ SPI_readresult AD2S1210_ReadFault(void) // 使用前需要先确保A0A1模式匹
  * @param   index   选择旋变编号
  * @param   addr    寄存器地址
  */
-unsigned char AD2S1210_ReadRegister(AD2S1210_CHIP_ENUM index, SPI_HandleTypeDef *hspi, unsigned char addr) 
+unsigned char AD2S1210_ReadRegister(AD2S1210_CHIP_ENUM index, SPI_HandleTypeDef *hspi, unsigned char addr)
 {
     unsigned char buf = 0;
     AD2S1210_ModeSelect(CONFIG);
@@ -303,7 +303,7 @@ unsigned char AD2S1210_ReadRegister(AD2S1210_CHIP_ENUM index, SPI_HandleTypeDef 
  * @param   addr    寄存器地址
  * @param   data    写入数据
  */
-void AD2S1210_WriteRegister(SPI_HandleTypeDef *hspi, unsigned char addr, unsigned char data) 
+void AD2S1210_WriteRegister(SPI_HandleTypeDef *hspi, unsigned char addr, unsigned char data)
 {
     AD2S1210_ModeSelect(CONFIG);
     AD2S1210_DataRelease();
@@ -351,7 +351,7 @@ void AD2S1210_Init(void)
     AD2S1210_WriteRegister(&hspi2, AD2S1210_DOS_MISS_THRESHOLD, 0X7F);
 
     //	AD2S.Register_data = AD2S1210_ReadRegister(ONE,AD2S1210_LOS_THRESHOLD);
-    AD2S1210_ModeSelect(POSITION);
+    //  AD2S1210_ModeSelect(POSITION);
 }
 
 /**
@@ -359,6 +359,7 @@ void AD2S1210_Init(void)
  */
 void AD2S1210_Angle_Get(void)
 {
+    AD2S1210_ModeSelect(POSITION);
     SPI_readresult res = AD2S1210_ReadPosition(ALL);
     /***电机1***/
     Drive_AD2S.Mechanical_Angle = (res.position_data1 - 32767) * M_PI / 32767.f;
@@ -371,18 +372,17 @@ void AD2S1210_Angle_Get(void)
 /**
  * @brief   AD2S1210 读取电角速度
  */
-void AD2S1210_Speed_Get(float t_sample)
+void AD2S1210_Speed_Get(void)
 {
-    Drive_AD2S.Current_Angle = Drive_AD2S.Electrical_Angle;
-    Drive_AD2S.angle_diff    = (Drive_AD2S.Current_Angle - Drive_AD2S.Last_Angle);
-    if (Drive_AD2S.angle_diff > M_PI) {
-        Drive_AD2S.angle_diff = Drive_AD2S.angle_diff - 2 * M_PI;
-    } else if (Drive_AD2S.angle_diff < -M_PI) {
-        Drive_AD2S.angle_diff = Drive_AD2S.angle_diff + 2 * M_PI;
-    } else {
-        Drive_AD2S.angle_diff = Drive_AD2S.angle_diff;
-    }
+    AD2S1210_ModeSelect(VELOCITY);
+    SPI_readresult res = AD2S1210_ReadVelocity(ALL);
+    /***电机1***/
+    Drive_AD2S.Speed_read    = (int16_t)(res.velocity_data1);
+    Drive_AD2S.Current_Speed = (float)(Drive_AD2S.Speed_read * 0.329f); // 125*60/2^15
+    Drive_AD2S.Speed         = 0.01f * Drive_AD2S.Current_Speed + 0.99f * Drive_AD2S.Speed;
 
-    Drive_AD2S.Speed      = Drive_AD2S.angle_diff / t_sample;
-    Drive_AD2S.Last_Angle = Drive_AD2S.Current_Angle;
+    /***电机2***/
+    Load_AD2S.Speed_read    = (int16_t)(res.velocity_data2);
+    Load_AD2S.Current_Speed = (float)(Load_AD2S.Speed_read * 0.329f); // 125*60/2^15
+    Load_AD2S.Speed         = 0.01f * Load_AD2S.Current_Speed + 0.99f * Load_AD2S.Speed;
 }

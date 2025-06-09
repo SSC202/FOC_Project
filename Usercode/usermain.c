@@ -42,8 +42,8 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
     hw_curr_sample(hadc);
 
     // Angle and Speed Sample
-    AD2S1210_Angle_Get();                   // Angle Sample
-    AD2S1210_Speed_Get(SYSTEM_SAMPLE_TIME); // Speed Sample
+    AD2S1210_Angle_Get(); // Angle Sample
+    AD2S1210_Speed_Get(); // Speed Sample
     /**********************************
      * @brief   FOC Calculate
      */

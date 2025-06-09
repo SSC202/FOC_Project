@@ -157,6 +157,7 @@ typedef struct
     float Last_Angle;
     float angle_diff;
     float Current_Speed;
+    int16_t Speed_read;
 } ad2s1210_t;
 
 typedef enum {
@@ -195,16 +196,16 @@ void AD2S1210_HW_RESET(void);                             // 硬件重启初始�
 
 SPI_readresult AD2S1210_ReadPosition(AD2S1210_CHIP_ENUM index); // 使用前需要先确保A0A1模式匹配
 SPI_readresult AD2S1210_ReadVelocity(AD2S1210_CHIP_ENUM index); // 使用前需要先确保A0A1模式匹配
-SPI_readresult AD2S1210_ReadFault(void);              // 使用前需要先确保A0A1模式匹配(普通模式)
+SPI_readresult AD2S1210_ReadFault(void);                        // 使用前需要先确保A0A1模式匹配(普通模式)
 
-unsigned char AD2S1210_ReadRegister(AD2S1210_CHIP_ENUM index, SPI_HandleTypeDef *hspi, unsigned char addr) ; // 使用前需要先确保A0A1模式匹配,配置模式
+unsigned char AD2S1210_ReadRegister(AD2S1210_CHIP_ENUM index, SPI_HandleTypeDef *hspi, unsigned char addr); // 使用前需要先确保A0A1模式匹配,配置模式
 void AD2S1210_WriteRegister(SPI_HandleTypeDef *hspi, unsigned char addr, unsigned char data);               // 使用前需要先确保A0A1模式匹配,配置模式
 
 unsigned char AD2S1210_GetFault(AD2S1210_CHIP_ENUM index, SPI_HandleTypeDef *hspi); // 故障发生时用于读取故障
 
 void AD2S1210_para_Init(void);
 void AD2S1210_Angle_Get(void);
-void AD2S1210_Speed_Get(float t_sample);
+void AD2S1210_Speed_Get(void);
 
 #ifdef __cplusplus
 }
