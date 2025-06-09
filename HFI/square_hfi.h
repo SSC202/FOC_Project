@@ -1,8 +1,9 @@
 #ifndef __SQUARE_HFI_H
 #define __SQUARE_HFI_H
 
-#include "my_math.h"
+#include "foc_math.h"
 #include "coordinate_transform.h"
+#include "user_transfunc.h"
 
 typedef struct
 {

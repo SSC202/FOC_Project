@@ -1,5 +1,5 @@
 #include "square_hfi.h"
-#include "my_math.h"
+#include "foc_math.h"
 
 /**
  * @brief   生成高频注入电压
@@ -116,7 +116,7 @@ static void HFI_observe(HFI_t *hfi)
         // Speed LPF
         hfi->speed_lpf.input = hfi->pll.output;
         LPF_Calc(&hfi->speed_lpf, hfi->enable);
-        hfi->speed_obs = hfi->speed_lpf.output;
+        hfi->speed_obs = hfi->speed_lpf.output * 60.f / (4 * 2 * M_PI);
 
         // Theta
         hfi->theta_obs += hfi->pll.output * hfi->sample_time;

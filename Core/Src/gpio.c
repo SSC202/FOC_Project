@@ -54,13 +54,14 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOG_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, AD2S2_A1_Pin|AD2S2_DIR_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, DAC_RET_Pin|AD2S2_A1_Pin|DAC_SYNC_Pin|DAC_GAIN_Pin
+                          |AD2S2_DIR_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, AD2S2_RD_Pin|AD2S2_RESET_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOF, AD2S1_SAM_Pin|GPIO_PIN_4|GPIO_PIN_5, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOF, AD2S1_SAM_Pin|GPIO_PIN_4|DAC_LDAC_Pin|DAC_RETL_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(AD2S1_RESET_GPIO_Port, AD2S1_RESET_Pin, GPIO_PIN_SET);
@@ -85,6 +86,13 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pins : DAC_RET_Pin DAC_SYNC_Pin DAC_GAIN_Pin */
+  GPIO_InitStruct.Pin = DAC_RET_Pin|DAC_SYNC_Pin|DAC_GAIN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pins : AD2S2_A1_Pin AD2S2_DIR_Pin SPI2_CS_Pin */
   GPIO_InitStruct.Pin = AD2S2_A1_Pin|AD2S2_DIR_Pin|SPI2_CS_Pin;
@@ -114,8 +122,8 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(AD2S1_RESET_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PF4 PF5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5;
+  /*Configure GPIO pins : PF4 DAC_LDAC_Pin DAC_RETL_Pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_4|DAC_LDAC_Pin|DAC_RETL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

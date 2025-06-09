@@ -5,6 +5,8 @@
 #include "svpwm.h"
 #include "curr_sample.h"
 #include "ad2s1210.h"
+#include "hwdac.h"
+#include "user_transfunc.h"
 /** User include **/
 #include "square_hfi.h"
 /** End Include **/
@@ -24,14 +26,16 @@
 
 extern uint8_t system_enable; // 系统使能参数,0为失能,1为使能
 extern uint8_t system_print;  // 参数打印,用户自行定义串口打印的变量
-extern uint16_t u_dac_value;  // DAC 示波器打印变量,用户自行赋值
+extern uint16_t system_dac_value1; // DAC Channel1 示波器打印变量,用户自行赋值
+extern uint16_t system_dac_value2; // DAC Channel1 示波器打印变量,用户自行赋值
+extern uint16_t hwdac_value1;      // 外部DAC1通道值
+extern uint16_t hwdac_value2;      // 外部DAC2通道值
+extern uint16_t hwdac_value3;      // 外部DAC3通道值
+extern uint16_t hwdac_value4;      // 外部DAC4通道值
 
 /******************************************************
  * @brief   临时变量
  */
-// float error = 0;
-// u_dac_value = (uint16_t)((Drive_hfi.i_err * 20000 * 200 / 2048) + 2048);
-// HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, u_dac_value);
 
 /******************************************************
  * @brief   对拖平台驱动电机端相关定义
