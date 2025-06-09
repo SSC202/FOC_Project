@@ -10,8 +10,8 @@ void HFI_Init(HFI_t *hfi, float tsample)
     hfi->vf_ratio      = 0.01; // 恒压频比
     hfi->filter_type_1 = 4;    // 默认使用二阶 Tustin 法离散化HPF(z)
     hfi->filter_type_2 = 4;
-    hfi->HPF1_fc       = 0.1; // 默认截止频率
-    hfi->HPF2_fc       = 0.2;
+    hfi->HPF1_fc_ratio       = 0.1; // 默认截止频率
+    hfi->HPF2_fc_ratio       = 0.2;
     hfi->t_sample      = tsample;
 
     PID_init(&hfi->pll, 4000, 2000, 500, INFINITY);
@@ -81,20 +81,20 @@ void HFI_Calc(HFI_t *hfi)
     // HPF(z) 截止频率及 1.5Ts 延迟补偿角计算
     float comp;
     if (0 < hfi->f_inj && hfi->f_inj < 5000) {
-        hfi->HPF1_fc = hfi->HPF1_fc * hfi->f_inj;
-        hfi->HPF2_fc = hfi->HPF2_fc * hfi->f_inj;
+        hfi->HPF1_fc = hfi->HPF1_fc_ratio * hfi->f_inj;
+        hfi->HPF2_fc = hfi->HPF2_fc_ratio * hfi->f_inj;
         comp         = 2 * M_PI * hfi->f_inj * hfi->t_sample * 1.5f;
     } else if (5000 < hfi->f_inj && hfi->f_inj < 10000) {
-        hfi->HPF1_fc = hfi->HPF1_fc * (10000 - hfi->f_inj);
-        hfi->HPF2_fc = hfi->HPF2_fc * (10000 - hfi->f_inj);
+        hfi->HPF1_fc = hfi->HPF1_fc_ratio * (10000 - hfi->f_inj);
+        hfi->HPF2_fc = hfi->HPF2_fc_ratio * (10000 - hfi->f_inj);
         comp         = 2 * M_PI * (hfi->f_inj - 10000) * hfi->t_sample * 1.5f;
     } else if (-5000 < hfi->f_inj && hfi->f_inj < 0) {
-        hfi->HPF1_fc = -hfi->HPF1_fc * hfi->f_inj;
-        hfi->HPF2_fc = -hfi->HPF2_fc * hfi->f_inj;
+        hfi->HPF1_fc = -hfi->HPF1_fc_ratio * hfi->f_inj;
+        hfi->HPF2_fc = -hfi->HPF2_fc_ratio * hfi->f_inj;
         comp         = 2 * M_PI * hfi->f_inj * hfi->t_sample * 1.5f;
     } else if (-10000 < hfi->f_inj && hfi->f_inj < -5000) {
-        hfi->HPF1_fc = hfi->HPF1_fc * (10000 + hfi->f_inj);
-        hfi->HPF2_fc = hfi->HPF2_fc * (10000 + hfi->f_inj);
+        hfi->HPF1_fc = hfi->HPF1_fc_ratio * (10000 + hfi->f_inj);
+        hfi->HPF2_fc = hfi->HPF2_fc_ratio * (10000 + hfi->f_inj);
         comp         = 2 * M_PI * (hfi->f_inj + 10000) * hfi->t_sample * 1.5f;
     }
 

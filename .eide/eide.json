@@ -3,7 +3,8 @@
   "type": "ARM",
   "dependenceList": [],
   "srcDirs": [
-    "HFI"
+    "HFI",
+    "Hardwarecode"
   ],
   "virtualFolder": {
     "name": "<virtual_root>",
@@ -175,10 +176,10 @@
             "path": "FOC/curr_sample.c"
           },
           {
-            "path": "FOC/my_math.c"
+            "path": "FOC/svpwm.c"
           },
           {
-            "path": "FOC/svpwm.c"
+            "path": "FOC/foc_math.c"
           }
         ],
         "folders": []
@@ -206,6 +207,12 @@
           },
           {
             "path": "Usercode/userpara.c"
+          },
+          {
+            "path": "Usercode/loadfoc.c"
+          },
+          {
+            "path": "Usercode/user_transfunc.c"
           }
         ],
         "folders": []
@@ -363,6 +370,7 @@
           "Drivers/CMSIS/Include",
           "FOC",
           "HFI",
+          "Hardwarecode",
           "Encoder",
           "Usercode",
           ".cmsis/include",

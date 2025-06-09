@@ -57,6 +57,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define DAC_RET_Pin GPIO_PIN_2
+#define DAC_RET_GPIO_Port GPIOE
 #define AD2S2_A1_Pin GPIO_PIN_4
 #define AD2S2_A1_GPIO_Port GPIOE
 #define AD2S2_RD_Pin GPIO_PIN_13
@@ -75,6 +77,14 @@ void Error_Handler(void);
 #define M1_U_GPIO_Port GPIOC
 #define AD2S1_RD_Pin GPIO_PIN_2
 #define AD2S1_RD_GPIO_Port GPIOB
+#define DAC_LDAC_Pin GPIO_PIN_14
+#define DAC_LDAC_GPIO_Port GPIOF
+#define DAC_RETL_Pin GPIO_PIN_15
+#define DAC_RETL_GPIO_Port GPIOF
+#define DAC_SYNC_Pin GPIO_PIN_7
+#define DAC_SYNC_GPIO_Port GPIOE
+#define DAC_GAIN_Pin GPIO_PIN_14
+#define DAC_GAIN_GPIO_Port GPIOE
 #define AD2S2_PCS_Pin GPIO_PIN_10
 #define AD2S2_PCS_GPIO_Port GPIOB
 #define AD2S2_A0_Pin GPIO_PIN_12

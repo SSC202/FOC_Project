@@ -1,7 +1,8 @@
 #ifndef __ROTATE_HFI_H
 #define __ROTATE_HFI_H
 
-#include "my_math.h"
+#include "foc_math.h"
+#include "user_transfunc.h"
 #include "coordinate_transform.h"
 
 typedef struct

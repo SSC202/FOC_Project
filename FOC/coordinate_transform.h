@@ -17,7 +17,7 @@
 #ifndef __COORDINATE_TRANSFORM_H
 #define __COORDINATE_TRANSFORM_H
 
-#include "my_math.h"
+#include "foc_math.h"
 
 /**
  * 结构体相关定义

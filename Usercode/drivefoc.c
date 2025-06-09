@@ -111,27 +111,27 @@ void drive_foc_calc(void)
      * @note    7 : 输出PLL输入的误差信号
      */
     if (system_dac_print == 0) {
-        u_dac_value1 = (uint16_t)(2048);
-        u_dac_value2 = (uint16_t)(2048);
+        system_dac_value1 = (uint16_t)(2048);
+        system_dac_value2 = (uint16_t)(2048);
     } else if (system_dac_print == 1) {
-        u_dac_value1 = (uint16_t)((Drive_hfi.theta_true + M_PI) / (2 * M_PI) * 4096);
-        u_dac_value2 = (uint16_t)((Drive_hfi.theta_obs + M_PI) / (2 * M_PI) * 4096);
+        system_dac_value1 = (uint16_t)((Drive_hfi.theta_true + M_PI) / (2 * M_PI) * 4096);
+        system_dac_value2 = (uint16_t)((Drive_hfi.theta_obs + M_PI) / (2 * M_PI) * 4096);
     } else if (system_dac_print == 2) {
-        u_dac_value1 = (uint16_t)((Drive_hfi.speed_true + 80.0f) / (160.0f) * 4096);
-        u_dac_value2 = (uint16_t)((Drive_hfi.speed_obs + 80.0f) / (160.0f) * 4096);
+        system_dac_value1 = (uint16_t)((Drive_hfi.speed_true + 80.0f) / (160.0f) * 4096);
+        system_dac_value2 = (uint16_t)((Drive_hfi.speed_obs + 80.0f) / (160.0f) * 4096);
     } else if (system_dac_print == 3) {
-        u_dac_value1 = (uint16_t)((Drive_ualphabetah.alpha + 200.0f) / (400.0f) * 4096);
-        u_dac_value2 = (uint16_t)((Drive_ualphabetah.beta + 200.0f) / (400.0f) * 4096);
+        system_dac_value1 = (uint16_t)((Drive_ualphabetah.alpha + 200.0f) / (400.0f) * 4096);
+        system_dac_value2 = (uint16_t)((Drive_ualphabetah.beta + 200.0f) / (400.0f) * 4096);
     } else if (system_dac_print == 4) {
-        u_dac_value1 = (uint16_t)((Drive_ialphabeta.alpha + 4.5f) / (9.0f) * 4096);
-        u_dac_value2 = (uint16_t)((Drive_ialphabeta.beta + 4.5f) / (9.0f) * 4096);
+        system_dac_value1 = (uint16_t)((Drive_ialphabeta.alpha + 4.5f) / (9.0f) * 4096);
+        system_dac_value2 = (uint16_t)((Drive_ialphabeta.beta + 4.5f) / (9.0f) * 4096);
     } else if (system_dac_print == 5) {
-        u_dac_value1 = (uint16_t)((Drive_hfi.i_alpha_beta_h.alpha + 0.25f) / (0.5f) * 4096);
-        u_dac_value2 = (uint16_t)((Drive_hfi.i_alpha_beta_h.beta + 0.25f) / (0.5f) * 4096);
+        system_dac_value1 = (uint16_t)((Drive_hfi.i_alpha_beta_h.alpha + 0.25f) / (0.5f) * 4096);
+        system_dac_value2 = (uint16_t)((Drive_hfi.i_alpha_beta_h.beta + 0.25f) / (0.5f) * 4096);
     } else if (system_dac_print == 6) {
-        u_dac_value1 = (uint16_t)((Drive_idq.d + 4.5f) / (9.0f) * 4096);
-        u_dac_value2 = (uint16_t)((Drive_idq.q + 4.5f) / (9.0f) * 4096);
+        system_dac_value1 = (uint16_t)((Drive_idq.d + 4.5f) / (9.0f) * 4096);
+        system_dac_value2 = (uint16_t)((Drive_idq.q + 4.5f) / (9.0f) * 4096);
     } else if (system_dac_print == 7) {
-        u_dac_value1 = (uint16_t)((Drive_hfi.error_dem + 0.25f) / (0.5f) * 4096);
+        system_dac_value1 = (uint16_t)((Drive_hfi.error_dem + 0.25f) / (0.5f) * 4096);
     }
 }
