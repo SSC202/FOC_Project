@@ -373,7 +373,7 @@ void AD2S1210_Speed_Get(void)
     // SPI_readresult res = AD2S1210_ReadVelocity(ALL);
     /***电机1***/
     Drive_AD2S.Speed_read    = (int16_t)(res.velocity_data1);
-    Drive_AD2S.Current_Speed = (float)(Drive_AD2S.Speed_read * 0.329f); // 125*60/2^15
+    Drive_AD2S.Current_Speed = (float)(Drive_AD2S.Speed_read * 0.287f); // 125*60/2^15
     Drive_AD2S.Speed         = 0.01f * Drive_AD2S.Current_Speed + 0.99f * Drive_AD2S.Speed;
 
     // /***电机2***/
