@@ -14,6 +14,8 @@ void user_init(void)
     // alpha_beta 轴低通滤波器参数初始化
     LPF_Init(&Drive_ialpha_filter, 200, SYSTEM_SAMPLE_TIME);
     LPF_Init(&Drive_ibeta_filter, 200, SYSTEM_SAMPLE_TIME);
+    LPF_Init(&i_alpha_nh_1_filter, 1, SYSTEM_SAMPLE_TIME);
+    LPF_Init(&i_beta_nh_1_filter, 1, SYSTEM_SAMPLE_TIME);
     HFI_Init(&Drive_hfi, SYSTEM_SAMPLE_TIME);
     /******************************************************
      * @brief   负载电机FOC相关变量初始化

@@ -14,7 +14,7 @@ void HFI_Init(HFI_t *hfi, float tsample)
     hfi->HPF2_fc_ratio       = 0.2;
     hfi->t_sample      = tsample;
 
-    PID_init(&hfi->pll, 4000, 2000, 500, INFINITY);
+    PID_init(&hfi->pll, 4000, 2000, 200, INFINITY);
 
     hfi->polar_comp_enable = 0; // 不使用极性补偿
 
@@ -83,19 +83,19 @@ void HFI_Calc(HFI_t *hfi)
     if (0 < hfi->f_inj && hfi->f_inj < 5000) {
         hfi->HPF1_fc = hfi->HPF1_fc_ratio * hfi->f_inj;
         hfi->HPF2_fc = hfi->HPF2_fc_ratio * hfi->f_inj;
-        comp         = 2 * M_PI * hfi->f_inj * hfi->t_sample * 1.5f;
+        comp         = 2 * M_PI * hfi->f_inj * hfi->t_sample * 0.5f;
     } else if (5000 < hfi->f_inj && hfi->f_inj < 10000) {
         hfi->HPF1_fc = hfi->HPF1_fc_ratio * (10000 - hfi->f_inj);
         hfi->HPF2_fc = hfi->HPF2_fc_ratio * (10000 - hfi->f_inj);
-        comp         = 2 * M_PI * (hfi->f_inj - 10000) * hfi->t_sample * 1.5f;
+        comp         = 2 * M_PI * (hfi->f_inj - 10000) * hfi->t_sample * 0.5f;
     } else if (-5000 < hfi->f_inj && hfi->f_inj < 0) {
         hfi->HPF1_fc = -hfi->HPF1_fc_ratio * hfi->f_inj;
         hfi->HPF2_fc = -hfi->HPF2_fc_ratio * hfi->f_inj;
-        comp         = 2 * M_PI * hfi->f_inj * hfi->t_sample * 1.5f;
+        comp         = 2 * M_PI * hfi->f_inj * hfi->t_sample * 0.5f;
     } else if (-10000 < hfi->f_inj && hfi->f_inj < -5000) {
         hfi->HPF1_fc = hfi->HPF1_fc_ratio * (10000 + hfi->f_inj);
         hfi->HPF2_fc = hfi->HPF2_fc_ratio * (10000 + hfi->f_inj);
-        comp         = 2 * M_PI * (hfi->f_inj + 10000) * hfi->t_sample * 1.5f;
+        comp         = 2 * M_PI * (hfi->f_inj + 10000) * hfi->t_sample * 0.5f;
     }
 
     // 滤波器参数设计，根据 filter type 和 HPF(z)1/HPF(z)2 截止设计两个 HPF(z) 的参数

@@ -94,3 +94,19 @@ HFI_t Drive_hfi; // 驱动电机高频注入结构体
 
 alpha_beta_t Drive_ualphabetah; // 驱动电机 alpha-beta 轴高频指令电压
 abc_t Drive_uabch;              // 驱动电机 ABC 相高频指令电压
+// 信噪比实验代码
+float i_alpha_nh_1;
+float i_alpha_nh_2;
+float i_beta_nh_1;
+float i_beta_nh_2;
+LPF_t i_alpha_nh_1_filter;
+LPF_t i_alpha_nh_2_filter;
+LPF_t i_beta_nh_1_filter;
+LPF_t i_beta_nh_2_filter;
+float i_alpha_nh_3;
+float i_alpha_nh_4;
+float i_beta_nh_3;
+float i_beta_nh_4;
+float Inh_1;
+float Inh_2;
+float Inh;

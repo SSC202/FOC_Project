@@ -26,6 +26,9 @@ void usermain(void)
         if (system_print == 1) {
             printf("re; obs; err: %f,%f,%f\n", Drive_AD2S.Speed, Drive_hfi.speed_obs, Drive_hfi.speed_error);
         }
+        if (system_print == 2) {
+            printf("Inh1; Inh2; Inh: %f,%f,%f\n", Inh_1 * 4000, Inh_2 * 4000, Inh * 4000);
+        }
     }
 }
 

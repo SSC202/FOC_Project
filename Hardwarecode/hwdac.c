@@ -106,7 +106,7 @@ static HAL_StatusTypeDef AD5676_set_value(uint8_t ch, uint16_t value)
 void hw_dac_output(void)
 {
 	AD5676_set_value(1, hwdac_value1);
-	AD5676_set_value(2, hwdac_value2);
-	AD5676_set_value(3, hwdac_value3);
-	AD5676_set_value(4, hwdac_value4);
+	// AD5676_set_value(2, hwdac_value2);
+	// AD5676_set_value(3, hwdac_value3);
+	// AD5676_set_value(4, hwdac_value4);
 }
