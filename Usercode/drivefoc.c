@@ -74,6 +74,8 @@ void drive_foc_calc(void)
     Drive_udqh.q = Drive_hfi.udq_h.q;
     dq_2_abc(&Drive_udqh, &Drive_uabch, Drive_hfi.theta_obs);
 
+    hwdac_value1 = (Drive_hfi.udq_h.d + 100) / 200 * 65535;
+
     Drive_ish_filter.input = Drive_hfi.ish_pi_controller.fdb;
     LPF_Calc(&Drive_ish_filter, Drive_hfi.enable);
 

@@ -237,9 +237,9 @@ SPI_readresult AD2S1210_ReadVelocity(AD2S1210_CHIP_ENUM index)
     /***SPI1***/
     result.velocity_data1 = SPI_ReadByte(&hspi1) << 8;
     result.velocity_data1 += SPI_ReadByte(&hspi1);
-    /***SPI2***/
-    result.velocity_data2 = SPI_ReadByte(&hspi2) << 8; // 高八位
-    result.velocity_data2 += SPI_ReadByte(&hspi2);     // 低八位
+    // /***SPI2***/
+    // result.velocity_data2 = SPI_ReadByte(&hspi2) << 8; // 高八位
+    // result.velocity_data2 += SPI_ReadByte(&hspi2);     // 低八位
 
     AD2S1210_DataLock();
 
@@ -369,14 +369,15 @@ void AD2S1210_Angle_Get(void)
 void AD2S1210_Speed_Get(void)
 {
     AD2S1210_ModeSelect(VELOCITY);
-    SPI_readresult res = AD2S1210_ReadVelocity(ALL);
+    SPI_readresult res = AD2S1210_ReadVelocity(ONE);
+    // SPI_readresult res = AD2S1210_ReadVelocity(ALL);
     /***电机1***/
     Drive_AD2S.Speed_read    = (int16_t)(res.velocity_data1);
     Drive_AD2S.Current_Speed = (float)(Drive_AD2S.Speed_read * 0.329f); // 125*60/2^15
     Drive_AD2S.Speed         = 0.01f * Drive_AD2S.Current_Speed + 0.99f * Drive_AD2S.Speed;
 
-    /***电机2***/
-    Load_AD2S.Speed_read    = (int16_t)(res.velocity_data2);
-    Load_AD2S.Current_Speed = -(float)(Load_AD2S.Speed_read * 0.329f); // 125*60/2^15
-    Load_AD2S.Speed         = 0.01f * Load_AD2S.Current_Speed + 0.99f * Load_AD2S.Speed;
+    // /***电机2***/
+    // Load_AD2S.Speed_read    = (int16_t)(res.velocity_data2);
+    // Load_AD2S.Current_Speed = -(float)(Load_AD2S.Speed_read * 0.329f); // 125*60/2^15
+    // Load_AD2S.Speed         = 0.01f * Load_AD2S.Current_Speed + 0.99f * Load_AD2S.Speed;
 }
