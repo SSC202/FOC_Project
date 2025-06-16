@@ -17,7 +17,7 @@
  *              接口类型: LPF_t  低通滤波器结构体句柄,使用时在主函数内定义全局结构体
  *              接口函数:   LPF_Init()      低通滤波器结构体初始化
  *                          LPF_Calc()     单次低通滤波器计算
- *      
+ *
  */
 #ifndef __MY_MATH_H
 #define __MY_MATH_H
@@ -25,7 +25,15 @@
 #include "math.h"
 #include "stm32h7xx.h"
 
-#define M_PI         3.141592653589793f // PI
+#define M_PI         3.14159265359f // PI
+#define M_PI_3       1.0471975512f  // PI/3
+
+#define M_SQRT3      1.73205080757f // SQRT(3)
+#define M_1_SQRT3    0.57735026919f // 1/SQRT(3)
+#define M_SQRT3_2    0.86602540378f // SQRT(3)/2
+
+#define M_2_DIV3     0.66666666667f // 2/3
+
 #define M_TABLE_SIZE 1024
 
 float normalize(int pole_pairs, float mechine_angle, float offset);
