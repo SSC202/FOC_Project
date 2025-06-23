@@ -36,7 +36,7 @@ typedef struct
     dq_t idq_h[4];   // 高频注入电流
     float isig;      // 解调后信号
     float icomp;     // 偏置信号
-    float ish_comp;  // 补偿倍数
+    float power;     // 高频功率
 } HFI_t;
 
 void HFI_Inject(HFI_t *hfi); // 电压注入

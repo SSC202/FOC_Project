@@ -6,6 +6,17 @@
  */
 void HFI_Inject(HFI_t *hfi)
 {
+    // 计算高频电压幅值
+    static float udh, uqh;
+    udh = hfi->u_h * cosf(hfi->theta_inj);
+    uqh = hfi->u_h * sinf(hfi->theta_inj);
+
+    // 计算高频功率分量
+    static float power;
+    if (hfi->step == 1 || hfi->step == 3) {
+        power = udh * ((hfi->idq_h)[3].d - (hfi->idq_h)[1].d) + uqh * ((hfi->idq_h)[3].q - (hfi->idq_h)[1].q);
+    }
+
     // 计算电流注入角度对应的电压注入角度
     static float theta_inj;
     theta_inj = atanf((110 / 55) * tanf(hfi->theta_inj_i));
@@ -51,28 +62,28 @@ void HFI_Inject(HFI_t *hfi)
     // 高频电压注入
     switch (hfi->step) {
         case 1:
-            hfi->udq_h.d = hfi->u_h * cosf(hfi->theta_inj);
-            hfi->udq_h.q = hfi->u_h * sinf(hfi->theta_inj);
+            hfi->udq_h.d = udh;
+            hfi->udq_h.q = uqh;
             hfi->step    = 2;
             break;
         case 2:
-            hfi->udq_h.d = hfi->u_h * cosf(hfi->theta_inj);
-            hfi->udq_h.q = hfi->u_h * sinf(hfi->theta_inj);
+            hfi->udq_h.d = udh;
+            hfi->udq_h.q = uqh;
             hfi->step    = 3;
             break;
         case 3:
-            hfi->udq_h.d = -hfi->u_h * cosf(hfi->theta_inj);
-            hfi->udq_h.q = -hfi->u_h * sinf(hfi->theta_inj);
+            hfi->udq_h.d = -udh;
+            hfi->udq_h.q = -uqh;
             hfi->step    = 4;
             break;
         case 4:
-            hfi->udq_h.d = -hfi->u_h * cosf(hfi->theta_inj);
-            hfi->udq_h.q = -hfi->u_h * sinf(hfi->theta_inj);
+            hfi->udq_h.d = -udh;
+            hfi->udq_h.q = -uqh;
             hfi->step    = 1;
             break;
         default:
-            hfi->udq_h.d = -hfi->u_h * cosf(hfi->theta_inj);
-            hfi->udq_h.q = -hfi->u_h * sinf(hfi->theta_inj);
+            hfi->udq_h.d = -udh;
+            hfi->udq_h.q = -uqh;
             hfi->step    = 1;
             break;
     }
@@ -93,12 +104,28 @@ static void HFI_demodulate(HFI_t *hfi)
     (hfi->idq_h[hfi->step - 1]).q = hfi->idqh_now.q;
 
     // demodulate
-    if (hfi->step == 2 || hfi->step == 4) {
-        iq_sig     = (hfi->idq_h)[3].q - (hfi->idq_h)[1].q;
-        id_sig     = (hfi->idq_h)[3].d - (hfi->idq_h)[1].d;
-        hfi->icomp = hfi->u_h * hfi->offset * sinf(2 * hfi->theta_inj);
-        hfi->isig  = id_sig * sinf(hfi->theta_inj) + iq_sig * cosf(hfi->theta_inj) - hfi->icomp;
+    switch (hfi->step) {
+        case 1:
+            iq_sig = (hfi->idq_h)[3].q - (hfi->idq_h)[0].q;
+            id_sig = (hfi->idq_h)[3].d - (hfi->idq_h)[0].d;
+            break;
+        case 2:
+            iq_sig = (hfi->idq_h)[0].q - (hfi->idq_h)[1].q;
+            id_sig = (hfi->idq_h)[0].d - (hfi->idq_h)[1].d;
+            break;
+        case 3:
+            iq_sig = (hfi->idq_h)[2].q - (hfi->idq_h)[1].q;
+            id_sig = (hfi->idq_h)[2].d - (hfi->idq_h)[1].d;
+            break;
+        case 3:
+            iq_sig = (hfi->idq_h)[3].q - (hfi->idq_h)[2].q;
+            id_sig = (hfi->idq_h)[3].d - (hfi->idq_h)[2].d;
+            break;
+        default:
+            break;
     }
+    hfi->icomp = hfi->u_h * hfi->offset * sinf(2 * hfi->theta_inj);
+    hfi->isig  = id_sig * sinf(hfi->theta_inj) + iq_sig * cosf(hfi->theta_inj) - hfi->icomp;
 }
 
 /**
