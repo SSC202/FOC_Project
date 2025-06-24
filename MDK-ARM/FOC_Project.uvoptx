@@ -205,6 +205,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>Drive_speed_pi</ItemText>
         </Ww>
+        <Ww>
+          <count>11</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>system_dac_print,0x0A</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>

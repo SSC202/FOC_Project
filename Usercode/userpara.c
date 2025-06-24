@@ -8,8 +8,10 @@
 #define LOAD_MAX_CURRENT   20.0f   // 驱动电机电流限制
 #define SYSTEM_SAMPLE_TIME 0.0001f // 系统采样时间,根据 CubeMX 配置
 
-uint8_t system_enable; // 系统使能参数,0为失能,1为使能
-uint8_t system_print;  // 参数打印,用户自行定义串口打印的变量
+uint8_t system_enable;    // 系统使能参数,0为失能,1为使能
+uint8_t system_print;     // 参数打印,用户自行定义串口打印的变量
+uint8_t system_dac_print; // DAC打印，用户自行定义DAC打印的变量
+
 uint16_t system_dac_value1;   // DAC Channel1 示波器打印变量,用户自行赋值
 uint16_t system_dac_value2;   // DAC Channel2 示波器打印变量,用户自行赋值
 extern uint16_t hwdac_value1; // 外部DAC1通道值

@@ -86,4 +86,31 @@ void drive_foc_calc(void)
     Drive_uabc.b = Drive_uabcl.b + Drive_uabch.b;
     Drive_uabc.c = Drive_uabcl.c + Drive_uabch.c;
     e_svpwm(&Drive_uabc, 201, &Drive_duty_abc);
+
+    /************************************************************
+     * @brief   DAC Output
+     */
+
+    switch (system_dac_print) {
+        case 0:
+            hwdac_value1 = (Drive_hfi.theta_obs + M_PI) / (2 * M_PI) * 65535;
+            hwdac_value2 = (Drive_hfi.theta_true + M_PI) / (2 * M_PI) * 65535;
+            hwdac_value3 = (Drive_hfi.theta_err + M_PI) / (2 * M_PI) * 65535;
+            break;
+        case 1:
+            hwdac_value1 = (Drive_hfi.speed_obs + 120) / (240) * 65535;
+            hwdac_value2 = (Drive_hfi.speed_true + 120) / (240) * 65535;
+            hwdac_value3 = (Drive_hfi.speed_err + 120) / (240) * 65535;
+            break;
+        case 2:
+            hwdac_value1 = (Drive_hfi.theta_inj_i + M_PI) / (2 * M_PI) * 65535;
+            hwdac_value2 = (Drive_hfi.theta_err + M_PI) / (2 * M_PI) * 65535;
+            break;
+        case 3:
+            hwdac_value1 = (Drive_hfi.theta_inj_i + M_PI) / (2 * M_PI) * 65535;
+            hwdac_value2 = (Drive_hfi.power + 2) / (8) * 65535;
+            break;
+        default:
+            break;
+    }
 }

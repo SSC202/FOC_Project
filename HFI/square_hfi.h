@@ -15,6 +15,7 @@ typedef struct
     PID_t pll;               // 锁相环
     LPF_t speed_lpf;         // 速度低通滤波器
     PID_t ish_pi_controller; // 信噪比控制器
+    LPF_t power_lpf;         // 功率计算滤波器
 
     // Control Parameters 运行控制相关参数
     uint8_t step;   // 运行步
@@ -24,6 +25,8 @@ typedef struct
     dq_t udq_h;      // 高频注入电压
     float theta_obs; // 估计角度
     float speed_obs; // 估计速度
+    float theta_err; // 估计角度误差
+    float speed_err; // 估计速度误差
 
     // Input Parameters 输入参数
     dq_t idqh_now;    // 高频注入响应电流

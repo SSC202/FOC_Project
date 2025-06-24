@@ -6,17 +6,6 @@
  */
 void HFI_Inject(HFI_t *hfi)
 {
-    // 计算高频电压幅值
-    static float udh, uqh;
-    udh = hfi->u_h * cosf(hfi->theta_inj);
-    uqh = hfi->u_h * sinf(hfi->theta_inj);
-
-    // 计算高频功率分量
-    static float power;
-    if (hfi->step == 1 || hfi->step == 3) {
-        power = udh * ((hfi->idq_h)[3].d - (hfi->idq_h)[1].d) + uqh * ((hfi->idq_h)[3].q - (hfi->idq_h)[1].q);
-    }
-
     // 计算电流注入角度对应的电压注入角度
     static float theta_inj;
     theta_inj = atanf((110 / 55) * tanf(hfi->theta_inj_i));
@@ -45,7 +34,7 @@ void HFI_Inject(HFI_t *hfi)
         hfi->ish_pi_controller.output    = 0;
     }
     if (hfi->step == 2 || hfi->step == 4) {
-        PID_Calc(&hfi->ish_pi_controller, hfi->enable, hfi->sample_time);
+        PID_Calc(&hfi->ish_pi_controller, hfi->enable, hfi->sample_time * 2);
     }
     u_bias = hfi->ish_pi_controller.output;
 
@@ -54,6 +43,20 @@ void HFI_Inject(HFI_t *hfi)
     z_n      = (((0.0275f + 0.055f)) / 2.f) + (((0.055f - 0.0275f) / 2.f) * sinf(2 * (hfi->theta_inj_i) - (M_PI / 2)));
     u_href   = 5000 * z_n * hfi->ish; // 5000 为实测倍率(2.5kHz注入)
     hfi->u_h = u_bias + u_href;
+
+    // 计算高频电压幅值
+    static float udh, uqh;
+    udh = hfi->u_h * cosf(hfi->theta_inj);
+    uqh = hfi->u_h * sinf(hfi->theta_inj);
+
+    // 计算高频功率分量
+    static float power;
+    if (hfi->step == 1 || hfi->step == 3) {
+        power                = udh * ((hfi->idq_h)[2].d - (hfi->idq_h)[0].d) + uqh * ((hfi->idq_h)[2].q - (hfi->idq_h)[0].q);
+        hfi->power_lpf.input = power;
+        LPF_Calc(&hfi->power_lpf, 1);
+        hfi->power = hfi->power_lpf.output;
+    }
 
     if (hfi->u_h > 90) {
         hfi->u_h = 90;
@@ -117,7 +120,7 @@ static void HFI_demodulate(HFI_t *hfi)
             iq_sig = (hfi->idq_h)[2].q - (hfi->idq_h)[1].q;
             id_sig = (hfi->idq_h)[2].d - (hfi->idq_h)[1].d;
             break;
-        case 3:
+        case 4:
             iq_sig = (hfi->idq_h)[3].q - (hfi->idq_h)[2].q;
             id_sig = (hfi->idq_h)[3].d - (hfi->idq_h)[2].d;
             break;
@@ -134,26 +137,25 @@ static void HFI_demodulate(HFI_t *hfi)
 static void HFI_observe(HFI_t *hfi)
 {
     // 使能时采用无感数据
-    if (hfi->step == 2 || hfi->step == 4) {
-        // PLL Caculate
-        hfi->pll.ref = hfi->isig;
-        hfi->pll.fdb = 0;
-        PID_Calc(&hfi->pll, hfi->enable, hfi->sample_time);
 
-        // Speed LPF
-        hfi->speed_lpf.input = hfi->pll.output;
-        LPF_Calc(&hfi->speed_lpf, hfi->enable);
-        hfi->speed_obs = hfi->speed_lpf.output * 60.f / (4 * 2 * M_PI);
+    // PLL Caculate
+    hfi->pll.ref = hfi->isig;
+    hfi->pll.fdb = 0;
+    PID_Calc(&hfi->pll, hfi->enable, hfi->sample_time);
 
-        // Theta
-        hfi->theta_obs += hfi->pll.output * hfi->sample_time;
+    // Speed LPF
+    hfi->speed_lpf.input = hfi->pll.output;
+    LPF_Calc(&hfi->speed_lpf, hfi->enable);
+    hfi->speed_obs = hfi->speed_lpf.output * 60.f / (4 * 2 * M_PI);
 
-        while (hfi->theta_obs < -M_PI) {
-            hfi->theta_obs = hfi->theta_obs + 2 * M_PI;
-        }
-        while (hfi->theta_obs > M_PI) {
-            hfi->theta_obs = hfi->theta_obs - 2 * M_PI;
-        }
+    // Theta
+    hfi->theta_obs += hfi->pll.output * hfi->sample_time;
+
+    while (hfi->theta_obs < -M_PI) {
+        hfi->theta_obs = hfi->theta_obs + 2 * M_PI;
+    }
+    while (hfi->theta_obs > M_PI) {
+        hfi->theta_obs = hfi->theta_obs - 2 * M_PI;
     }
 
     // 不使能时采用有感运行数据
@@ -163,6 +165,16 @@ static void HFI_observe(HFI_t *hfi)
     if (hfi->enable == 0) {
         hfi->theta_obs = hfi->theta_true;
     }
+
+    // 误差计算
+    hfi->theta_err = hfi->theta_true - hfi->theta_obs;
+    while (hfi->theta_err < -M_PI) {
+        hfi->theta_err = hfi->theta_err + 2 * M_PI;
+    }
+    while (hfi->theta_err > M_PI) {
+        hfi->theta_err = hfi->theta_err - 2 * M_PI;
+    }
+    hfi->speed_err = hfi->speed_true - hfi->speed_obs;
 }
 
 /**
@@ -209,4 +221,6 @@ void HFI_Init(HFI_t *hfi, float ish, float ts, float kp, float ki, float fc, flo
     hfi->idq_h[2].q = 0;
     hfi->idq_h[3].d = 0;
     hfi->idq_h[3].q = 0;
+
+    LPF_Init(&hfi->power_lpf, 2, hfi->sample_time * 2);
 }
